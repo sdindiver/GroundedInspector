@@ -1,0 +1,1 @@
+line_mark = single continuous diagonal groove from near the middle hole down to the serrated hole; identify by CONTINUITY, not brightness (brighter parallel streaks are polish/grain)

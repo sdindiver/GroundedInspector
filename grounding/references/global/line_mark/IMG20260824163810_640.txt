@@ -1,0 +1,1 @@
+line_mark = single thin CONTINUOUS groove running hole-to-hole down the face; faint and defined, NOT the bright specular band

@@ -1,0 +1,90 @@
+Review the existing QMSInspector-Grounded prompt in this project and improve it incrementally.
+
+You have access to the project context and the current prompt. **Use the existing prompt as the baseline. Do not ask me to paste it.**
+
+Act as a senior multimodal AI and computer-vision prompt architect.
+
+The goal is to identify and make **high-value improvements to the existing prompt that can improve inspection reliability, visual grounding, consistency, and resistance to hallucination.**
+
+### Review the existing prompt for
+
+1. **Visual grounding**
+
+   * Ensure decisions are based on what is actually visible.
+   * Strengthen the connection between the INPUT and the available reference/evidence information.
+   * Prevent assumptions based only on similarity or expectations.
+
+2. **Evidence usage**
+
+   * Evaluate how reference images and retrieved evidence are used.
+   * Ensure similar examples support reasoning rather than automatically determining the result.
+   * Consider whether positive and negative evidence should be explicitly compared.
+
+3. **Hallucination prevention**
+
+   * Prevent invented defects.
+   * Prevent invented visual characteristics.
+   * Prevent treating reference information as proof that something exists in the INPUT.
+   * Prevent normal visual features, reflections, or expected features from being incorrectly interpreted as defects.
+
+4. **Inspection reasoning**
+
+   * Check whether the inspection process is logically ordered.
+   * Consider whether a candidate → verification → classification approach would improve reliability.
+   * Make the smallest useful changes rather than restructuring everything.
+
+5. **Uncertainty**
+
+   * Review how ambiguous, weak, unclear, or conflicting visual evidence is handled.
+   * Make sure the model does not create certainty when the image does not support it.
+   * Ensure uncertainty in one area does not cause other clearly visible findings to be missed.
+
+6. **Enumeration**
+
+   * Check whether the instructions reliably cause the model to inspect the complete image and identify distinct instances.
+   * Look for wording that could cause it to stop after finding the first or strongest finding.
+
+7. **Localization**
+
+   * Review instructions related to bounding boxes, line geometry, small defects, edges, multiple parts, orientation, and full-resolution inspection.
+   * Improve localization instructions only where there is a clear reliability benefit.
+
+8. **Instruction conflicts**
+
+   * Identify contradictory, ambiguous, redundant, or potentially confusing instructions.
+   * Resolve them with the smallest possible wording change.
+
+### Important
+
+Do **not** rewrite the prompt from scratch.
+
+Do **not** remove existing rules unless there is a clear reason that the rule is contradictory or harmful.
+
+Do **not** simplify away detailed rules that may be important for inspection accuracy.
+
+Do **not** optimize for prompt length or elegance.
+
+Optimize for **real-world visual inspection reliability and grounding**.
+
+### Response
+
+First provide:
+
+**A. Strong existing areas**
+What should be preserved.
+
+**B. Recommended improvements**
+For each:
+
+* Problem
+* Why it matters
+* Exact wording to add/change
+* Where to place it
+
+**C. Conflicts or ambiguities**
+Only identify genuine issues and provide the smallest correction.
+
+**D. Improved prompt**
+Provide the complete revised prompt using the current project prompt as the baseline.
+
+Clearly mark the changes you made so I can review them.

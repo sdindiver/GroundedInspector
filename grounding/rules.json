@@ -1,0 +1,12 @@
+{
+  "description": "Shared rule library. A rule authored ONCE here can be referenced from any part or global defect via {\"$ref\": \"<id>\"} (as a rulings/notes element or a guidance value), so a cross-cutting rule is single-sourced: edit it here and every reference updates. The renderer expands a reference to the IDENTICAL text (a string, or a sentence-list joined with single spaces), so adding a reference is behavior-preserving - always confirm with `python -m tools.prompt_snapshot`.",
+  "rules": {
+    "glare_bright_finish_discipline": [
+      "GLARE / BRIGHT-FINISH DISCIPLINE (read first on any shiny or washed-out photo): specular glare is a bright, grain-free hotspot that sits where light bounces off and shifts with angle - it is NEVER a defect.",
+      "Do not call glare a white_mark (white_mark is DULLER than its surroundings, glare is BRIGHTER).",
+      "Do not call a glare-blown hole 'serration_missing' - judge teeth from the rim outline, not the bore fill.",
+      "Do not call a bright reflection a dark defect.",
+      "When in doubt whether a bright/dull patch is real, prefer OK/NEEDS_REVIEW over a false flag."
+    ]
+  }
+}

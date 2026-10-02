@@ -1,0 +1,1 @@
+serration_missing = the LARGEST designated hole has a SMOOTH round rim with NO teeth/scallops, identical to a plain hole

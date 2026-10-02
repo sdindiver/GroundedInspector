@@ -1,0 +1,276 @@
+{
+  "version": 1,
+  "description": "Canonical catalog of GLOBAL defects. One authoritative definition per defect, shared by every part. scope='all' defects are checked on every part unless a part explicitly excludes them. scope='opt_in' defects are only checked when a part lists them under global_defects.include_opt_in.",
+  "defects": {
+    "corrosion": {
+      "severity": 2,
+      "color": [
+        30,
+        90,
+        160
+      ],
+      "scope": "all",
+      "signature": "Brown/orange/red mottled rust or oxidation staining on any surface, wall, face or edge. Distinguish from plating tint or shadow - true corrosion has a rough, blotchy texture and warm colour.",
+      "disambiguation": [
+        "DECISIVE TEST vs edge_chip at a rim/edge: corrosion is reddish/brown/orange mottled OXIDATION STAINING on INTACT metal - the surface/contour is unbroken, no material is missing.",
+        "If the reddish colour sits ON A SHEARED, CHIPPED or NOTCHED rim/edge where MATERIAL IS MISSING or torn (a break in the smooth edge outline), that is an EDGE_CHIP (the reddish is just contact/scuff staining on the chip), NOT corrosion.",
+        "Judge the EDGE OUTLINE first: smooth intact edge + reddish stain -> corrosion; broken/sheared edge with reddish scuff -> edge_chip."
+      ]
+    },
+    "line_mark": {
+      "severity": 3,
+      "display_name": "Line Mark",
+      "color": [
+        0,
+        220,
+        255
+      ],
+      "scope": "all",
+      "signature": "A thin, continuous linear trace running across the surface where the finish has been rubbed or gouged away, often spanning a large fraction of the part length and crossing over holes or markings WITHOUT breaking. It may catch the light as a bright hairline OR read as a relatively FAINT continuous line - do NOT assume the defect is the brightest streak on the part. On a brushed/plated finish it is distinguished from the normal directional grain by being a SINGLE, more-defined, continuous groove that holds ONE unbroken path over a large fraction of the part (often running hole-to-hole), whereas grain and polishing streaks are many short, shallow, look-alike parallel lines (see FINISH GRAIN RULE). Continuity and singularity matter more than orientation or brightness. A DARK or near-black mark is NOT a line_mark even if elongated - that is a dark_spot / dark_mark.",
+      "finish_grain_rule": [
+        "DECISIVE TEST vs the normal BRUSHED-FINISH GRAIN: a brushed or plated metal surface is naturally covered in many fine, roughly PARALLEL directional grain lines and shallow polishing micro-scratches - these are the FINISH, not defects.",
+        "Do NOT pick the single brightest hairline just because it is shiny; on a brushed finish the brightest hairlines are usually grain/polish, and the genuine line_mark may run at a SIMILAR angle to the grain, so angle alone does NOT separate them.",
+        "Identify the line_mark by being a SINGLE, more-defined, CONTINUOUS groove that stands apart from the grain field: it holds one unbroken path over a large fraction of the part (frequently connecting or crossing the holes) and is slightly deeper/more distinct than the surrounding shallow grain, EVEN WHEN it is relatively FAINT rather than the brightest thing on the part.",
+        "Judge by CONTINUITY, singularity and definition, not by maximum brightness.",
+        "A bright hairline that is short, one of many look-alike parallel streaks, and indistinguishable from the surrounding grain field is finish grain, NOT a line_mark."
+      ],
+      "enumeration_rule": [
+        "ENUMERATE EVERY DISTINCT LINE MARK - a part often has SEVERAL, and MISSING a faint one is the most common line_mark error.",
+        "Work in this order:",
+        "(1) FIRST sweep the whole face and make a COUNT of every distinct groove you can see - do not stop at the most obvious/brightest one; deliberately look for additional FAINTER grooves at other positions and angles, including short ones and ones near an edge or a hole.",
+        "(2) THEN draw EACH counted groove as its OWN tight box in `bbox`, so the number of boxes equals the number of grooves you counted.",
+        "(3) Give each its OWN confidence.",
+        "CRITICAL: the 0.60 confidence gate and the 'prefer OK over a false flag' bias govern the DECISION on an individual mark's certainty - they are NOT a licence to silently DROP a faint groove you can actually see.",
+        "A faint but genuinely visible groove is reported with a LOWER confidence (or the whole result set to NEEDS_REVIEW if you are unsure), NEVER omitted.",
+        "Under-counting (reporting one line when several exist) is a FAILURE even if the one you reported is correct.",
+        "When two grooves are close and parallel, they are still TWO separate marks - box both, do not merge them into one."
+      ],
+      "confidence_rule": [
+        "SCORE CONFIDENCE BY HOW MUCH CLEARLY-VISIBLE CONTINUOUS GROOVE THERE IS = CONTINUITY x LENGTH, *NOT* by peak brightness.",
+        "A line_mark's confidence must reflect the amount of unbroken, plainly-visible groove: a LONG groove that stays clearly visible end-to-end (e.g. running hole-to-hole across most of the part) is HIGH confidence; a SHORT groove, or one that fades out / is only visible over part of its span (especially where it crosses a bright, highly-reflective zone), is LOW confidence.",
+        "Do NOT reward a short mark just because one spot on it is very bright or 'pops' against a dark/mottled patch - local brightness or high local contrast on a noisy background does NOT make it a confident line_mark.",
+        "Concretely, when comparing two marks: the one whose visible continuous length (fraction of the part it clearly spans) is greater gets the HIGHER confidence, even if the other has a brighter peak.",
+        "Faint-but-long and clearly continuous beats short-and-locally-bright.",
+        "For a part with several grooves, more total visible groove length across them means higher overall confidence."
+      ],
+      "specular_rejection_rule": [
+        "REJECT SPECULAR REFLECTION AND RIM GLARE - the most common line_mark FALSE POSITIVE on a shiny plated part.",
+        "The BRIGHTEST, boldest long bright band on a polished face is almost always a mirror-like SPECULAR REFLECTION (a broad bright stripe down the part), NOT a line_mark; and a bright band that runs ALONG or just inside the part's EDGE/silhouette is RIM GLARE, also not a defect.",
+        "A genuine line_mark is FAINTER and LOWER-CONTRAST than these bright bands: a thin, subtle continuous groove on the matte brushed face, set IN from the silhouette and distinct from the dominant reflection stripe.",
+        "NEVER pick the single brightest, boldest or longest bright band as the line_mark - the real marks are the low-contrast grooves you only notice on close inspection.",
+        "If a candidate coincides with the part outline, or is the dominant central reflection band, REJECT it and look instead for the fainter interior grooves."
+      ],
+      "zoom_rule": [
+        "ZOOM BEFORE YOU CONCLUDE - a faint line_mark is often INVISIBLE at full-frame scale and only becomes obvious when magnified.",
+        "Do NOT decide 'no line_mark' (or miss one) from the whole-part view alone.",
+        "Sweep the face in overlapping REGIONS and mentally ZOOM into each suspect band as if it filled the frame, especially the matte interior away from the bright reflection stripe; a ~1px groove at full-frame size becomes a clear line when zoomed.",
+        "This is the decisive step for FAINT grooves: if a groove is only ambiguously visible zoomed-out, ZOOM IN before reporting present/absent - many real marks are missed purely because the inspector never magnified the region.",
+        "When still visible-but-uncertain after zooming, use the DIRECTION-UNCERTAIN FALLBACK (region bbox + NEEDS_REVIEW), never silent omission."
+      ],
+      "disambiguation": [
+        "DECISIVE TEST vs dark_spot / dark_mark: judge by COLOUR FIRST, then shape.",
+        "A line_mark is a BRIGHT / SILVER / shiny metallic hairline - a scratch or groove where the surface finish has been rubbed or gouged away exposing lighter, shinier BARE METAL that catches the light as a fine bright line.",
+        "Its defining trait is that it is LIGHTER and shinier than the surrounding finish.",
+        "A mark that is DARK or near-BLACK is NOT a line_mark even when it is elongated or streaky - a dark or black elongated mark is a dark_spot or dark_mark.",
+        "Classify by colour first: only bright / metallic exposed-metal scratches are line_marks; anything dark or black goes to dark_spot / dark_mark.",
+        "DECISIVE TEST vs dent: a line_mark is FLAT with no depth - a thin continuous surface trace with NO shadow trough beside it.",
+        "A DENT is a 3D deformation whose bent/raised edge also catches light as a bright glint, but that glint is SHORT, ROUNDED and LOCALISED (often on a rim/edge/collar) and sits next to a SHADOWED depression, and the contour is broken.",
+        "If the bright mark is localised, curved, on an edge, or paired with a depression -> dent, NOT line_mark.",
+        "Only a thin, continuous, depth-less bright streak is a line_mark."
+      ],
+      "annotation": {
+        "shape": "box",
+        "field": "bbox",
+        "instruction": "This defect is drawn as a BOX, not a line. For every distinct line mark / scratch on the part, emit one tight box per distinct line mark: a `bbox` [x,y,w,h] normalized (0..1, whole-image, DISPLAY orientation) that encloses just that one groove plus a thin margin - keep it TIGHT to the groove, never a box spanning the whole face. ENUMERATE EVERY DISTINCT LINE MARK: if the part shows 4 scratches, emit 4 boxes so the count matches; do NOT merge several grooves into one big box and do NOT report only the most obvious one. If a groove is faint or its extent is ambiguous, still emit a tight box around the visible groove region, give it a LOWER confidence, and set the overall result to NEEDS_REVIEW - never omit a visible groove."
+      },
+      "confidence_model": {
+        "method": "weighted_evidence",
+        "formula": "confidence = 0.45*continuity + 0.35*length + 0.20*distinctness (each factor 0..1, judged BY EYE; the formula only COMBINES them). Matches confidence_rule: score by CONTINUITY x LENGTH, not brightness.",
+        "factors": {
+          "continuity": {
+            "weight": 0.45,
+            "meaning": "how UNBROKEN the groove is end-to-end (1.0 = one continuous path; low = broken/dashed/only partly visible)."
+          },
+          "length": {
+            "weight": 0.35,
+            "meaning": "how much of the part the clearly-visible groove SPANS (1.0 = runs hole-to-hole across most of the part; low = short)."
+          },
+          "distinctness": {
+            "weight": 0.2,
+            "meaning": "how clearly it stands APART from the brushed grain / specular streaks (1.0 = one defined groove; low = blends into grain)."
+          }
+        }
+      }
+    },
+    "dent": {
+      "severity": 4,
+      "color": [
+        0,
+        140,
+        255
+      ],
+      "scope": "all",
+      "signature": "Metal pushed in or deformed but intact - no missing material. Any localised edge, rim, collar, flange or face deformation that breaks the smooth expected contour.",
+      "disambiguation": [
+        "DECISIVE TEST vs line_mark: a dent is a 3D DEFORMATION (metal pushed in, contour broken) - its edge may catch light as a bright glint, but it is SHORT, ROUNDED, LOCALISED and paired with an adjacent SHADOWED depression.",
+        "A line_mark is a FLAT, thin, continuous, depth-less bright streak with no shadow trough.",
+        "Judge by DEPTH/SHAPE: localised + depression + broken contour -> dent; thin continuous flat line -> line_mark.",
+        "In multi-part collages, zoom into the region before deciding - a small dent reads as a bright streak at collage scale."
+      ]
+    },
+    "edge_chip": {
+      "severity": 4,
+      "color": [
+        0,
+        200,
+        255
+      ],
+      "scope": "all",
+      "signature": "A clean cut, sheared notch or chipped-away section on an outer edge/flange where material is MISSING - a straight or angular break in an otherwise smooth silhouette. Missing material distinguishes this from a dent.",
+      "localization": [
+        "BBOX MUST tightly enclose ONLY the actual chipped/sheared notch on the edge (the spot where material is missing, plus a thin margin) - NOT the whole rim arc and NOT a generic corner of the part frame.",
+        "Localize to the exact break in the silhouette: include any bright torn/rough metal AND any reddish contact/scuff marks that mark the damaged patch, and make sure the box is CENTRED on them (do not let it drift to one side and clip part of the damage).",
+        "The chip is usually small - well under ~0.15 of the image in each dimension.",
+        "Coordinates are in DISPLAY orientation (the image as shown)."
+      ]
+    },
+    "dark_mark": {
+      "severity": 1,
+      "display_name": "Dark Marks",
+      "color": [
+        40,
+        40,
+        220
+      ],
+      "scope": "all",
+      "signature": "A larger or elongated irregular ABSOLUTE-DARK (near-black) blemish, smudge, streak-like blotch or clustered contamination with defined but non-geometric boundaries - a genuinely dark, near-black area, not merely a dull or tinted area. Use dark_mark when the dark material forms a connected patch/cluster or elongated smear larger than an isolated speck; there may be ONE or MULTIPLE such areas, and each gets its own box.",
+      "false_positive_rule": [
+        "Mark ONLY genuinely ABSOLUTE-DARK (near-black) areas.",
+        "The rainbow / passivation plating TINT (purple / pink / green / gold iridescence) is the FINISH, NOT a dark_mark - NEVER mark the tint even though it is coloured.",
+        "If a region is merely coloured, dull, or slightly shadowed but NOT near-black, do not flag it.",
+        "Only a clearly near-black patch counts."
+      ],
+      "localization": [
+        "BBOX MUST enclose ONLY the near-black blemish itself (plus a thin margin), tight on the dark pixels - not the surrounding tint, not the whole face.",
+        "Each near-black area gets its OWN tight box (emit several dark_mark entries when several exist).",
+        "The blemish is usually small - typically well under ~0.15 of the image in each dimension.",
+        "The marker segments the actual dark pixels inside this bbox, so keep the box tight on the darkened area."
+      ],
+      "classification_rule": [
+        "CLASSIFY BY CONNECTED AREA AND SHAPE: a connected elongated smear, irregular patch, or cluster of touching dark pixels is dark_mark even when narrow; reserve dark_spot for separate small isolated specks.",
+        "Do not split one connected dark mark into several dark_spot boxes."
+      ],
+      "confidence_model": {
+        "method": "weighted_evidence",
+        "formula": "confidence = 0.5*darkness + 0.3*boundary_definition + 0.2*not_tint_certainty (each 0..1, by eye).",
+        "factors": {
+          "darkness": {
+            "weight": 0.5,
+            "meaning": "how near-BLACK the blemish is vs merely tinted/shadowed (1.0 = clearly near-black; low = only dull/tinted)."
+          },
+          "boundary_definition": {
+            "weight": 0.3,
+            "meaning": "how discrete and clearly-bounded the blotch is (1.0 = crisp edge; low = diffuse/hazy)."
+          },
+          "not_tint_certainty": {
+            "weight": 0.2,
+            "meaning": "confidence it is a REAL dark mark, NOT passivation tint / glare / shadow."
+          }
+        }
+      }
+    },
+    "dark_spot": {
+      "severity": 1,
+      "display_name": "Dark Spots",
+      "color": [
+        90,
+        90,
+        190
+      ],
+      "scope": "all",
+      "signature": "Small, DISCRETE, separated, roughly rounded dark specks on the surface, clearly darker than the surrounding finish but smaller and less connected than a dark_mark. A part OFTEN has SEVERAL (commonly 2 or more), and they frequently sit near or ON the strap EDGES as well as on the open face - not only in the centre. Do not use dark_spot for one connected elongated smear, irregular patch, or touching cluster; those are dark_mark.",
+      "enumeration_rule": [
+        "ENUMERATE EVERY DISTINCT dark spot - UNDER-COUNTING is the most common error.",
+        "Sweep the WHOLE face AND both long edges, COUNT each discrete spot, and emit ONE tight bbox PER spot (several dark_spot entries when several exist).",
+        "Do NOT collapse multiple spots into one big box, and do NOT report only the single most obvious one."
+      ],
+      "false_positive_rule": [
+        "NOT a dark_spot: the uniform rainbow / passivation plating TINT, a HOLE bore or its shadow, specular glare, or faint DIFFUSE haze / mottling with no clear boundary.",
+        "A dark_spot is a DISCRETE, clearly-bounded darker blemish - if there is no crisp darker spot standing out from the finish, do NOT flag one (prefer OK)."
+      ],
+      "actionability_rule": [
+        "TINY-SPECK GATE: do not annotate an isolated one- or few-pixel dark dot when it has no clearly visible surrounding footprint or boundary.",
+        "Treat that evidence as below 0.60 confidence and leave it unmarked.",
+        "Annotate only when the dark evidence forms a visibly coherent, defect-sized area with a boundary; the bbox should cover that full visible footprint, not individual dark pixels."
+      ],
+      "disambiguation": [
+        "DECISIVE TEST vs line_mark: judge by COLOUR FIRST.",
+        "A dark_spot is any mark that is DARKER (near-black) than the surrounding finish.",
+        "If the mark is dark or black, classify it as a dark_spot (or a dark_mark when it is a larger solid blotch) EVEN IF it is somewhat elongated or streaky - darkness wins over shape.",
+        "A line_mark is reserved for BRIGHT / silver / shiny metallic scratches where bare metal is exposed; never label a dark or near-black mark as a line_mark.",
+        "Escalate to dark_mark when the dark area is a larger solid blotch rather than one or a few small dark spots."
+      ],
+      "classification_rule": [
+        "CLASSIFY BY CONNECTED AREA AND SHAPE AFTER THE COLOUR TEST: emit one dark_spot per separate small isolated speck with visible space around it.",
+        "If several dark pixels touch into an elongated smear, irregular patch, or connected cluster, emit one dark_mark for that connected area instead of splitting it into spots."
+      ],
+      "localization": [
+        "BBOX MUST enclose the FULL visible footprint of the dark spot or connected spot cluster, plus a small margin - not just one or two dark pixels and not the whole face.",
+        "One coherent blemish area gets ONE box; do not split a single speck/cluster into tiny pixel-sized boxes.",
+        "The box is usually small - typically well under ~0.15 of the image in each dimension - but it must cover the actual discolored area and its visible texture.",
+        "NEVER draw a box that spans a large fraction of the face or reaches unrelated areas.",
+        "The marker segments the dark pixels inside this bbox, so make the box defect-sized, not pixel-sized."
+      ],
+      "confidence_model": {
+        "method": "weighted_evidence",
+        "formula": "confidence = 0.45*discreteness + 0.35*darkness + 0.20*not_tint_certainty (each 0..1, by eye).",
+        "factors": {
+          "discreteness": {
+            "weight": 0.45,
+            "meaning": "a DISCRETE rounded spot with a clear boundary vs diffuse haze (1.0 = crisp spot; low = vague mottling)."
+          },
+          "darkness": {
+            "weight": 0.35,
+            "meaning": "how much darker than the surrounding finish (1.0 = clearly darker)."
+          },
+          "not_tint_certainty": {
+            "weight": 0.2,
+            "meaning": "confidence it is not tint / a hole bore or its shadow / specular glare."
+          }
+        }
+      }
+    },
+    "white_mark": {
+      "severity": 1,
+      "display_name": "White Mark",
+      "color": [
+        255,
+        220,
+        180
+      ],
+      "scope": "all",
+      "signature": "A localised irregular PALE, dull, low-lustre patch where the underlying brushed/machining grain is still visible through it - a loss of shine/colour, NOT added dark debris. Distinguish from glare and from dark burns/speckling (which are darker than the surroundings).",
+      "disambiguation": [
+        "DECISIVE TEST vs glare: a white_mark is LESS reflective than the metal around it (a dull, flat, matte patch - luster is LOST, and the brushed grain stays visible through it, and it does NOT move/shift with viewing angle).",
+        "GLARE/specular highlight is MORE reflective than its surroundings (a bright mirror-like hotspot that washes out the grain and sits where light bounces off - typically a smooth gradient near an edge or high point).",
+        "If the patch is brighter and grain-free -> glare, ignore it.",
+        "If the patch is duller/flatter than the rest of the same face with grain still readable -> white_mark.",
+        "When a part has an overall dull/rainbow passivation tint that covers the WHOLE face uniformly, that is the finish, not a white_mark; only flag a LOCALISED dull patch that contrasts with the rest of the same face."
+      ],
+      "actionability_rule": [
+        "A coherent localized matte/pale patch with a visible footprint and contrast against the surrounding finish is actionable as white_mark even when it is irregular or moderately large.",
+        "Box the full visible patch with a small margin; do not reduce it to tiny bright pixels or dismiss it as glare when the brushed grain remains visible."
+      ]
+    },
+    "logo_missing": {
+      "severity": 3,
+      "color": [
+        200,
+        60,
+        200
+      ],
+      "scope": "opt_in",
+      "signature": "A required embossed, stamped or printed logo / part-marking is absent, incomplete or illegible where the golden reference shows it present. Only checked for parts that declare a logo (opt-in)."
+    }
+  }
+}
