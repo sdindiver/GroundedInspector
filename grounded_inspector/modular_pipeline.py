@@ -160,7 +160,7 @@ def _aggregate(bundle, anatomy, results):
     )
     if unresolved:
         result=_REVIEW
-        primary=max(defects,key=lambda d:(d["severity"],d["confidence"]))["category"] if defects else None
+        primary=None
         review_reason="One or more required inspection checkpoints could not be resolved with available visual evidence."
     elif defects:
         result="DEFECT"
