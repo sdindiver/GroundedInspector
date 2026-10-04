@@ -155,16 +155,21 @@ def _aggregate(bundle, anatomy, results):
                "display_name":spec.get("display_name",r["defect"])}
             if loc.get("location"): d["location"]=loc["location"]
             defects.append(d)
-    if defects:
+    unresolved = anatomy["status"] != "CLEAR" or any(
+        r.get("status") == _REVIEW for r in results
+    )
+    if unresolved:
+        result=_REVIEW
+        primary=max(defects,key=lambda d:(d["severity"],d["confidence"]))["category"] if defects else None
+        review_reason="One or more required inspection checkpoints could not be resolved with available visual evidence."
+    elif defects:
         result="DEFECT"
         primary=max(defects,key=lambda d:(d["severity"],d["confidence"]))["category"]
         review_reason=None
-    elif anatomy["status"]!= "CLEAR" or any(r.get("status")==_REVIEW for r in results):
-        result=_REVIEW
-        primary=None
-        review_reason="One or more required inspection checkpoints could not be resolved with available visual evidence."
     else:
-        result="OK"; primary=None; review_reason=None
+        result="OK"
+        primary=None
+        review_reason=None
     return {"part":bundle["part"],"image":bundle["image"],"result":result,
             "primary":primary,"needs_review_reason":review_reason,
             "checkpoints":checkpoints,"defects":defects}
