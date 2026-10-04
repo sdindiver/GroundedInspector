@@ -1,18 +1,5 @@
 {
   "schema_version": 2,
-  "shared_rules": {
-    "dark_surface_classification": {
-      "rule": "Classify visible dark surface features by character, not by size alone. First decide whether the feature is a real, reportable dark defect rather than normal finish, glare, shadow, grain, or noise. Then use line_mark only for a true continuous groove/line. For remaining localized dark features, use dark_mark for a connected, patch-like, irregular, or clearly mark-like feature, and dark_spot for a compact, narrow, irregular, or localized cluster of spot-like blemishes. If it is not meaningful enough to report, report neither.",
-      "ignore": [
-        "Normal machining or polishing grain.",
-        "Diffuse lighting gradients.",
-        "Specular glare.",
-        "Hole bore or hole shadow.",
-        "Tiny incidental specks or image noise that are not reasonably reportable."
-      ],
-      "localization": "Use the tightest area that contains the actual reportable dark feature or localized cluster, not surrounding metal."
-    }
-  },
   "defects": {
     "corrosion": {
       "severity": 2,
@@ -111,7 +98,7 @@
         220
       ],
       "decision": {
-        "check": "Use the shared dark-surface classification rule, then sweep the whole visible surface, every outer edge/rim and every hole/feature border.",
+        "check": "Sweep the whole visible surface, every outer edge/rim and every hole/feature border.",
         "defect_when": "A clearly visible, distinct dark surface blemish is present on the metal and is significant enough to be a reportable marking. It may be small or large, dark gray, brown-black, or near-black. When the blemish is connected, patch-like, irregular, or elongated, classify it as dark_mark.",
         "clear_when": "No clearly visible, distinct, reportable dark surface marking is present.",
         "review_when": "A candidate dark region cannot be reliably separated from normal finish, glare, shadow, lighting gradient, or image noise.",
@@ -135,7 +122,7 @@
         190
       ],
       "decision": {
-        "check": "Use the shared dark-surface classification rule, then sweep the entire visible metal surface systematically, including the area around markings, holes, edges and transitions.",
+        "check": "Sweep the entire visible metal surface systematically, including the area around markings, holes, edges and transitions.",
         "defect_when": "A clearly visible, distinct localized dark surface blemish is present and is significant enough to be a reportable defect. The blemish may be a single compact spot, a narrow irregular spot, or a small localized cluster of multiple dark spots. It does not need to be circular or have a minimum width. A visible cluster of several meaningful dark spots in one local area is still reportable dark_spot evidence; do not dismiss it merely because each individual spot is small.",
         "clear_when": "The inspected surface has no clearly visible, distinct, reportable localized dark blemish or localized cluster of reportable dark spots.",
         "review_when": "A localized dark feature is visible but resolution, glare, shadow or finish variation prevents deciding whether it is a real reportable surface blemish.",
