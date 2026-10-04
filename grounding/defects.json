@@ -11,14 +11,17 @@
       ],
       "decision": {
         "check": "All visible faces, walls, rims and edges.",
-        "defect_when": "Brown, orange or red mottled oxidation with rough texture on intact metal.",
-        "clear_when": "No localized corrosion pattern is visible.",
-        "review_when": "Color or texture is too obscured to distinguish corrosion from finish or shadow.",
+        "defect_when": "A localized corrosion pattern is visibly present on intact metal: mottled brown, orange, red, or rust-like discoloration accompanied by corrosion texture such as pitting, roughness, flaking, or an irregular oxidized patch. A single thin scratch, stain, dark line, or small isolated discoloration without corrosion texture is not corrosion.",
+        "clear_when": "No localized oxidized/corroded pattern with supporting corrosion texture is visible.",
+        "review_when": "Color or texture is too obscured to distinguish genuine oxidation/corrosion from a scratch, stain, finish variation, shadow, or normal surface texture.",
         "ignore": [
           "Uniform plating/passivation tint.",
+          "Normal machining or polishing marks.",
+          "Thin scratches or linear surface marks without oxidation texture.",
+          "Small isolated discoloration without mottled corrosion texture.",
           "Shadow without oxidation texture."
         ],
-        "boundary": "Missing material or a broken silhouette is edge_chip.",
+        "boundary": "Corrosion requires both a corrosion-like appearance and supporting surface texture; do not classify a generic brown/dark mark as corrosion. Missing material or a broken silhouette is edge_chip.",
         "localization": "Tight box around each distinct corrosion patch."
       }
     },
