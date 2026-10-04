@@ -1,3 +1,4 @@
 flask
 pillow
-anthropic
+anthropic<1.0
+truststore

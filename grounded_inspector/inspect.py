@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import argparse
 import base64
+import io
 import json
 import os
 from typing import List, Optional, Tuple
@@ -97,7 +98,15 @@ def build_verdict(raw: dict, meta: dict) -> dict:
 def _encode_image(path: str) -> dict:
     ext = os.path.splitext(path)[1].lower()
     with open(path, "rb") as fh:
-        data = base64.standard_b64encode(fh.read()).decode("ascii")
+        image_data = fh.read()
+    from PIL import Image
+    with Image.open(io.BytesIO(image_data)) as image:
+        if max(image.size) > 2000:
+            image.thumbnail((2000, 2000), Image.Resampling.LANCZOS)
+            output = io.BytesIO()
+            image.save(output, format="PNG" if ext == ".png" else "JPEG", quality=95)
+            image_data = output.getvalue()
+    data = base64.standard_b64encode(image_data).decode("ascii")
     return {"type": "image", "source": {"type": "base64",
             "media_type": _MEDIA.get(ext, "image/png"), "data": data}}
 
@@ -130,12 +139,15 @@ def _bundle_images(bundle: dict) -> List[Tuple[str, str]]:
 
 def call_engine(prompt_text: str, images: List[Tuple[str, str]], model: str) -> dict:
     """Send the assembled bundle prompt + attached images to the Anthropic Vision API and
-    return the parsed verdict JSON. temperature=0 for reproducibility. Requires the
-    `anthropic` SDK and ANTHROPIC_API_KEY in the environment (the colleague's own key)."""
+    return the parsed verdict JSON. Sampling parameters are omitted because current
+    adaptive-thinking models reject temperature/top_p/top_k. Requires the `anthropic`
+    SDK and ANTHROPIC_API_KEY in the environment (the colleague's own key)."""
     try:
+        import truststore
+        truststore.inject_into_ssl()
         import anthropic
     except ImportError as e:  # noqa
-        raise RuntimeError("The 'anthropic' package is not installed. Run: pip install -r requirements.txt") from e
+        raise RuntimeError("The API dependencies are not installed. Run: pip install -r requirements.txt") from e
     if not os.environ.get("ANTHROPIC_API_KEY"):
         raise RuntimeError("ANTHROPIC_API_KEY is not set. Set it to your Anthropic API key and re-run.")
 
@@ -146,7 +158,7 @@ def call_engine(prompt_text: str, images: List[Tuple[str, str]], model: str) -> 
 
     client = anthropic.Anthropic()
     msg = client.messages.create(
-        model=model, max_tokens=3000, temperature=0,
+        model=model, max_tokens=3000,
         messages=[{"role": "user", "content": content}],
     )
     text = "".join(block.text for block in msg.content if getattr(block, "type", "") == "text")

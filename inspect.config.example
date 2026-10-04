@@ -1,0 +1,27 @@
+# GroundedInspector run configuration.
+# 1) Copy this file to:  inspect.config
+# 2) Fill in your values below.
+# 3) Run start.bat
+#
+# Rules:
+#  - Use KEY=VALUE with NO spaces around the = sign.
+#  - Lines starting with # are ignored.
+#  - inspect.config holds your SECRET API key and is gitignored - never commit it.
+
+# --- REQUIRED ---
+
+# Your Anthropic API key (create one at https://console.anthropic.com).
+ANTHROPIC_API_KEY=sk-ant-your-key-here
+
+# Full path to the folder of images to inspect.
+IMAGES_FOLDER=C:\path\to\bracket\images
+
+# --- OPTIONAL ---
+
+# Part to inspect. Must match a file in grounding/parts/ (e.g. bracket). Defaults to bracket.
+PART=bracket
+
+# Vision-capable model snapshot. Pin an EXACT dated snapshot for reproducible results,
+# e.g. claude-opus-4-YYYYMMDD (get the current id from your Anthropic console).
+# If left commented out, the engine uses its built-in default model.
+# ANTHROPIC_MODEL=claude-opus-4-00000000

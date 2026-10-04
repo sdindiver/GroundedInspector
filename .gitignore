@@ -13,6 +13,7 @@ env/
 .env
 *.pem
 *.key
+inspect.config
 
 # OS / editor
 .DS_Store
