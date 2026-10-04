@@ -29,8 +29,6 @@
         0,
         255
       ],
-      "scope": "part",
-      "reference_dir": "grounding/references/parts/bearing_cup/defects/missing_punch",
       "decision": {
         "check": "Inspect the central bore.",
         "defect_when": "The expected central through-hole is absent and the center is solid/blind.",
@@ -50,8 +48,6 @@
         90,
         255
       ],
-      "scope": "part",
-      "reference_dir": "grounding/references/parts/bearing_cup/defects/out_of_round",
       "decision": {
         "check": "Trace the central bore opening and account for perspective before judging shape.",
         "defect_when": "The bore contour is locally pinched, deformed or irregular beyond a smooth perspective ellipse.",
