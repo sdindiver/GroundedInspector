@@ -8,7 +8,7 @@
       "roles": {
         "serrated": {
           "identity": "largest hole",
-          "identification": "The serrated hole is the physically largest hole of the three. Identify it from its overall hole/rim diameter, not from the apparent diameter of the inner bore/opening alone. The serrated teeth project inward and can make the visible central opening look smaller than a plain hole. Perspective, foreshortening, lighting, and countersink/dish effects can also change apparent inner-opening size."
+          "identification": "The serrated hole is the physically largest hole of the three. Compare all three holes using the outer circular boundary where each hole meets the metal face (overall physical/rim diameter), not the apparent diameter of the inner bore/opening. The serrated teeth project inward and can make the visible central opening look smaller than a plain hole. Perspective, foreshortening, lighting, and countersink/dish effects can change apparent inner-opening size. Select the largest hole once before checking for teeth; do not use visible teeth, bore darkness, or inner-opening size to reselect the target."
         },
         "plain": {
           "identity": "the other two holes",
@@ -23,7 +23,7 @@
       "back": "Back is indicated by a square/sharp outer edge and plain holes that are flat through-holes. Either cue may be subtle; do not require a textbook-clear appearance of both cues.",
       "lighting_tolerance": "Lighting, reflection, viewing angle, and shallow countersinks can make a front-face cue look flatter or less pronounced. Judge the combined edge and plain-hole geometry rather than rejecting front solely because the countersink is subtle.",
       "unresolved": "Use only when the visible edge and plain-hole geometry is genuinely insufficient or contradictory for front/back orientation. Do not declare unresolved merely because one front/back cue is subtle.",
-      "for_dependent_checks": "Once front is established, checks such as embossing_missing and incomplete_embossing may evaluate the VA. Once back is established, a blank VA is normal for those checks."
+      "for_dependent_checks": "Once front is established, checks such as embossing_missing and incomplete_embossing may evaluate the VA. A confirmed front face with a completely blank designated VA zone is a valid embossing_missing case; do not use VA absence to decide that the face is back. Once back is established, a blank VA is normal for those checks."
     },
     "va": {
       "face": "front",
