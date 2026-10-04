@@ -11,9 +11,9 @@
       }
     },
     "face": {
-      "front": "outer edge is chamfered/rolled; plain holes are countersunk/dished",
-      "back": "outer edge is square/sharp; plain holes are flat through-holes",
-      "unresolved": "edge/countersink profile is unreadable"
+      "front": "outer edge is chamfered/rolled; plain holes are visibly countersunk/dished and not flat through-holes",
+      "back": "outer edge is square/sharp; plain holes are visibly flat through-holes with no countersink/dish",
+      "unresolved": "edge/countersink profile is unreadable or the visible plain-hole geometry cannot distinguish flat through-holes from countersunk/dished holes"
     },
     "va": {
       "face": "front",
@@ -91,15 +91,17 @@
         0
       ],
       "decision": {
-        "check": "Establish front/back from the outer-edge profile before reading the VA zone.",
-        "defect_when": "Front face is confirmed by a chamfered/rolled edge and countersunk plain holes, and the designated VA zone is blank.",
-        "clear_when": "Front face is confirmed and VA is present; or back face is confirmed and VA is blank.",
-        "review_when": "The outer-edge/countersink profile cannot reliably establish front versus back.",
+        "check": "First establish front versus back using the outer edge and the two plain holes. Treat a square/sharp edge together with flat, non-countersunk plain holes as the back face; treat a chamfered/rolled edge together with countersunk/dished plain holes as the front face. Only after this orientation decision inspect the VA zone.",
+        "defect_when": "Front face is confirmed by a chamfered/rolled edge and countersunk/dished plain holes, and the designated VA zone is blank.",
+        "clear_when": "Back face is confirmed by a square/sharp edge and flat through-holes, and the VA zone is blank; or front face is confirmed and VA is present.",
+        "review_when": "The edge and plain-hole geometry cannot reliably establish front versus back.",
         "ignore": [
-          "Using a blank VA zone alone to infer the back face.",
+          "A blank VA zone on a confirmed back face; this is normal and must not be reported as embossing_missing.",
+          "Using the blank VA zone itself to decide front versus back.",
           "Glare, shadow or dirt mistaken for a missing mark."
         ],
-        "localization": "Tight box around the designated VA zone."
+        "localization": "Tight box around the designated VA zone only when front face is confirmed and VA is actually missing.",
+        "boundary": "Embossing_missing is possible only after the front face has been positively established. Never infer a missing embossing defect from a blank VA zone when the back face is confirmed."
       }
     }
   }
