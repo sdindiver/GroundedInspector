@@ -9,7 +9,6 @@
         90,
         160
       ],
-      "scope": "all",
       "decision": {
         "check": "All visible faces, walls, rims and edges.",
         "defect_when": "Brown, orange or red mottled oxidation with rough texture on intact metal.",
@@ -31,7 +30,6 @@
         220,
         255
       ],
-      "scope": "all",
       "decision": {
         "check": "Sweep the complete visible surface and follow any candidate line end-to-end.",
         "defect_when": "One thin, defined, continuous bright/bare-metal groove runs across a substantial distance of the surface.",
@@ -59,7 +57,6 @@
         140,
         255
       ],
-      "scope": "all",
       "decision": {
         "check": "Sweep faces, rims, edges, collars and flanges for contour changes.",
         "defect_when": "Metal is pushed/deformed inward while material remains present, with a localized broken contour or depression.",
@@ -81,7 +78,6 @@
         200,
         255
       ],
-      "scope": "all",
       "decision": {
         "check": "Trace the entire outer silhouette, rim and every flange/edge.",
         "defect_when": "A notch, sheared break or chipped section shows material missing from an otherwise continuous silhouette.",
@@ -103,7 +99,6 @@
         40,
         220
       ],
-      "scope": "all",
       "decision": {
         "check": "Sweep the whole visible surface, every outer edge/rim and every hole/feature border.",
         "defect_when": "A connected near-black blotch or elongated smear forms one solid dark area.",
@@ -126,7 +121,6 @@
         90,
         190
       ],
-      "scope": "all",
       "decision": {
         "check": "Sweep the entire visible metal surface systematically, including the area around markings, holes, edges and transitions.",
         "defect_when": "A localized, bounded dark blemish is visibly darker than the immediately surrounding metal and has a distinct footprint, even if small.",
@@ -151,7 +145,6 @@
         220,
         180
       ],
-      "scope": "all",
       "decision": {
         "check": "Sweep the whole visible surface, edges/rims and feature borders.",
         "defect_when": "A localized pale/dull low-luster patch contrasts with surrounding metal while underlying grain remains visible.",
