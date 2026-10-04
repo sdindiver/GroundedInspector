@@ -32,11 +32,19 @@ tools/
   check_grounding.py
 ```
 
-Runtime path:
+Runtime path for explicit-part inspection:
 
 ```
-loader -> assembler -> prompt -> model -> inspect -> renderer
+loader -> assembler -> shared anatomy -> independent defect inspectors -> aggregator -> renderer
 ```
+
+The modular inspection pipeline is the production path for explicit-part runs:
+- shared anatomy is established once;
+- each configured defect is evaluated independently;
+- verdict aggregation is deterministic;
+- the renderer displays the aggregated verdict and must not semantically reclassify defects.
+
+Auto-identification remains on the compatibility path until its multi-instance orchestration is migrated to the same architecture.
 
 ## Grounding schema
 
