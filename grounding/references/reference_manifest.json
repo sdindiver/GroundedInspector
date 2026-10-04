@@ -1,13 +1,59 @@
 {
   "schema_version": 1,
   "purpose": "Curated visual reference set for grounding decisions.",
-  "status": "awaiting_uploaded_reference_images",
+  "status": "active",
   "categories": {
     "bracket/serration": [],
     "bracket/embossing_missing": [],
     "bracket/incomplete_embossing": [],
     "bracket/line_mark": [],
-    "bracket/dark_spot": [],
+    "bracket/dark_spot": [
+      {
+        "id": "dark_spot_01",
+        "image": "global/dark_spot/IMG20260824164818_640.png",
+        "crop": "global/dark_spot/IMG20260824164818_640_crop.png",
+        "expected": "dark_spot",
+        "reason": "Faint discrete dark smudge along the top long edge between two holes; edge-hugging but distinct from edge shadow or overall tint.",
+        "annotation": "global/dark_spot/IMG20260824164818_640.txt",
+        "localization": "Top long edge between two holes."
+      },
+      {
+        "id": "dark_spot_02",
+        "image": "global/dark_spot/IMG20260824164838_640.png",
+        "crop": "global/dark_spot/IMG20260824164838_640_crop.png",
+        "expected": "dark_spot",
+        "reason": "Small discrete near-black bounded speck immediately right of the VA emboss; distinct from tint or glare.",
+        "annotation": "global/dark_spot/IMG20260824164838_640.txt",
+        "localization": "Immediately right of the VA emboss."
+      },
+      {
+        "id": "dark_spot_03",
+        "image": "global/dark_spot/IMG20260824164950_640.png",
+        "crop": "global/dark_spot/IMG20260824164950_640_crop.png",
+        "expected": "dark_spot",
+        "reason": "Two discrete near-black specks; each is an independent reportable dark spot rather than passivation tint.",
+        "annotation": "global/dark_spot/IMG20260824164950_640.txt",
+        "localization": "One left of VA and one right of the middle hole; enumerate each."
+      },
+      {
+        "id": "dark_spot_04",
+        "image": "global/dark_spot/IMG20260824165050_640.png",
+        "crop": "global/dark_spot/IMG20260824165050_640_crop.png",
+        "expected": "dark_spot",
+        "reason": "Two discrete darker-than-finish specks between the left and middle holes; not passivation tint or hole shadow.",
+        "annotation": "global/dark_spot/IMG20260824165050_640.txt",
+        "localization": "Between the left hole and the middle hole; enumerate each."
+      },
+      {
+        "id": "dark_spot_05",
+        "image": "global/dark_spot/IMG20260824165106_640.png",
+        "crop": "global/dark_spot/IMG20260824165106_640_crop.png",
+        "expected": "dark_spot",
+        "reason": "Discrete darker specks/mottling on the surface; distinct from passivation tint and hole shadow.",
+        "annotation": "global/dark_spot/IMG20260824165106_640.txt",
+        "localization": "Surface dark specks/mottling; enumerate each."
+      }
+    ],
     "bracket/corrosion": [],
     "bracket/face/front": [],
     "bracket/face/back": [],
@@ -17,6 +63,7 @@
     "image",
     "expected",
     "reason",
-    "annotation"
+    "annotation",
+    "localization"
   ]
 }
