@@ -7,6 +7,17 @@
     "bracket/embossing_missing": [],
     "bracket/incomplete_embossing": [],
     "bracket/line_mark": [],
+    "bracket/dark_mark": [
+      {
+        "id": "dark_mark_01",
+        "image": "global/dark_mark/IMG20260824165152_640.png",
+        "crop": "global/dark_mark/IMG20260824165152_640_crop.png",
+        "expected": "dark_mark",
+        "reason": "Near-black connected blotch on the metal surface just below the serrated hole; clearly darker than the surrounding finish and distinct from rainbow passivation tint.",
+        "annotation": "global/dark_mark/IMG20260824165152_640.txt",
+        "localization": "Just below the serrated hole on the upper portion of the strap."
+      }
+    ],
     "bracket/dark_spot": [
       {
         "id": "dark_spot_01",
