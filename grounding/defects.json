@@ -19,7 +19,8 @@
           "Uniform plating/passivation tint.",
           "Shadow without oxidation texture."
         ],
-        "boundary": "Missing material or a broken silhouette is edge_chip."
+        "boundary": "Missing material or a broken silhouette is edge_chip.",
+        "localization": "Tight box around each distinct corrosion patch."
       }
     },
     "line_mark": {
@@ -41,7 +42,8 @@
           "Many short parallel finish-grain lines.",
           "Broad specular gradients."
         ],
-        "boundary": "A localized 3D depression is dent; a dark connected patch is dark_mark."
+        "boundary": "A localized 3D depression is dent; a dark connected patch is dark_mark.",
+        "localization": "Tight box around each distinct line mark."
       },
       "annotation": {
         "shape": "box",
@@ -67,7 +69,8 @@
           "Flat thin continuous bright lines.",
           "Specular highlights on an intact contour."
         ],
-        "boundary": "Missing material is edge_chip; a flat continuous groove is line_mark."
+        "boundary": "Missing material is edge_chip; a flat continuous groove is line_mark.",
+        "localization": "Tight box around each distinct dent/deformation."
       }
     },
     "edge_chip": {
@@ -88,7 +91,8 @@
           "Reddish staining on an intact edge.",
           "Pushed-in material with no missing section."
         ],
-        "boundary": "Reddish oxidation on intact metal is corrosion; deformation without missing material is dent."
+        "boundary": "Reddish oxidation on intact metal is corrosion; deformation without missing material is dent.",
+        "localization": "Tight box around each missing-material notch."
       }
     },
     "dark_mark": {
@@ -110,7 +114,8 @@
           "Hole bore or its shadow.",
           "Loose separated specks; those are dark_spot."
         ],
-        "enumeration": "Report every distinct connected dark_mark with its own tight box."
+        "enumeration": "Report every distinct connected dark_mark with its own tight box.",
+        "localization": "Tight box around each connected dark blotch."
       }
     },
     "dark_spot": {
@@ -134,7 +139,8 @@
           "Diffuse haze without a boundary.",
           "One connected blotch; that is dark_mark."
         ],
-        "enumeration": "Report every distinct actionable spot separately; never merge separated spots."
+        "enumeration": "Report every distinct actionable spot separately; never merge separated spots.",
+        "localization": "Tight box around each distinct dark spot."
       }
     },
     "white_mark": {
@@ -154,7 +160,8 @@
         "ignore": [
           "Specular highlight that is brighter and washes out grain.",
           "Uniform overall finish tint."
-        ]
+        ],
+        "localization": "Tight box around each localized dull/pale patch."
       }
     },
     "logo_missing": {
@@ -173,7 +180,8 @@
         "review_when": "The designated marking is obscured enough that completeness or legibility cannot be decided.",
         "ignore": [
           "A blank area that is not the declared logo location."
-        ]
+        ],
+        "localization": "Tight box around the declared logo/marking location."
       }
     }
   }
