@@ -760,10 +760,6 @@ def _clip_bbox_to_part(bbox, part_mask, W, H):
 
 
 
-def _is_line_defect(d) -> bool:
-    """All configured defects are rendered as regions."""
-    return False
-
 def _sanitize_region_defects(defects, part_mask, base, W, H):
     """Safety net applied before drawing (also catches an API hallucination):
       1. DROP a box that falls off the part (on background / empty space).
@@ -774,7 +770,6 @@ def _sanitize_region_defects(defects, part_mask, base, W, H):
     lines = []
     boxes = list(defects)
     changed = False
-    # Line defects are also region annotations: their boxes must stay on the part.
     clipped_lines = []
     for d in lines:
         if isinstance(d.get("bbox"), (list, tuple)) and len(d.get("bbox")) == 4 and part_mask is not None:
