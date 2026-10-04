@@ -73,13 +73,14 @@ def build_verdict(raw: dict, meta: dict) -> dict:
         if not cat or "bbox" not in d:
             continue
         m = meta.get(cat, {"severity": 2, "display_name": cat.replace("_", " ").title()})
-        if "confidence" in d and d["confidence"] is not None:
-            conf = float(d["confidence"])
-        elif d.get("factors"):
+        factors = d.get("confidence_factors") or d.get("factors")
+        if factors:
             try:
-                conf = confidence.score(cat, d["factors"])[0]
+                conf = confidence.score(cat, factors)[0]
             except ValueError:
-                conf = 0.0
+                conf = float(d.get("confidence", 0.0) or 0.0)
+        elif "confidence" in d and d["confidence"] is not None:
+            conf = float(d["confidence"])
         else:
             conf = 0.0
         top = max(top, conf)
