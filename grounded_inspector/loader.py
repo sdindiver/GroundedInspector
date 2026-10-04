@@ -79,15 +79,7 @@ def pair_exemplars(paths: List[str]) -> List[dict]:
     return [bases[k] for k in order]
 
 def _normalize_decision(spec: dict) -> dict:
-    decision = dict(spec.get("decision") or {})
-    if not decision:
-        # Legacy configs remain readable during migration.
-        decision = {"check": spec.get("signature",""), **{
-            k: spec[k] for k in ("disambiguation","false_positive_rule","classification_rule",
-                                 "pattern_match_protocol","glare_rule","localization")
-            if k in spec
-        }}
-    return decision
+    return dict(spec.get("decision") or {})
 
 def resolve_defects(part: dict, catalog: Optional[dict] = None) -> List[dict]:
     catalog = catalog or load_global_catalog()
