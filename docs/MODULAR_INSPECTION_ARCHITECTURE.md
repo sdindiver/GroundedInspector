@@ -59,3 +59,13 @@ The architecture is designed around:
 The purpose is to make a change to one defect less capable of silently changing an
 unrelated defect decision. Regression testing remains required before considering
 the migration production-stable.
+
+
+## Validation
+
+Repository CI runs:
+- grounding schema validation;
+- deterministic modular aggregation unit tests.
+
+Visual regression cases should be added to the same validation strategy as the approved
+inspection dataset grows.
