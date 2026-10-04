@@ -99,10 +99,9 @@ def resolve_defects(part: dict, catalog: Optional[dict] = None) -> List[dict]:
             "category": cat, "scope": scope,
             "severity": spec.get("severity", 2 if scope=="global" else 3),
             "color": spec.get("color"),
-            "signature": spec.get("signature") or decision.get("check",""),
+            "signature": decision.get("check",""),
             "annotation": spec.get("annotation"),
             "decision": decision,
-            "guidance": {},
             "reference_images": _images_in(ref_dir or spec.get("reference_dir","")),
         })
 
@@ -110,7 +109,7 @@ def resolve_defects(part: dict, catalog: Optional[dict] = None) -> List[dict]:
         scope=spec.get("scope","all")
         keep=(scope=="all" and _norm(cat) not in exclude) or (scope=="opt_in" and _norm(cat) in include_opt_in)
         if keep: add(cat,spec,"global",os.path.join("grounding","references","global",cat))
-    part_defs=part.get("defects", part.get("part_defects", {})) or {}
+    part_defs=part.get("defects", {}) or {}
     for cat,spec in part_defs.items(): add(cat,spec,"part",spec.get("reference_dir"))
     for cat in include:
         if cat not in seen and cat in { _norm(x) for x in (catalog.get("defects",{}) or {}) }:
