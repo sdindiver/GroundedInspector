@@ -11,9 +11,6 @@ same:
   * a high-contrast triple-stroke LOCATOR outline (black halo -> white ->
     colour) around it, thicker for the primary (highest-severity) defect;
   * a dark label chip with white text.
-Line-shaped defects (line_mark) are drawn as a tight box around each groove; a defect
-that explicitly supplies line geometry is still stroked as a QMS scratch trace.
-
 The segmentation/marking here mirrors QMSInspector/inspector/renderer.py. It is a
 rendering concern only: the engine (me today, the Anthropic API later) supplies
 the verdict geometry; this module draws it. cv2 is optional - without it the
@@ -50,10 +47,6 @@ _SEG_BY_CATEGORY = {
 }
 _FILL_ALPHA = 0.30  # QMS blends the colour overlay at 30%.
 
-# Annotation shapes the renderer knows how to draw. The grounding gate asserts every
-# declared annotation.shape is in this set and matches intended_primitive().
-SUPPORTED_ANNOTATION_SHAPES = {"line", "box", "circle"}
-
 
 _STATUS_COLOR = {  # RGB
     "DEFECT": (239, 68, 68),
@@ -71,7 +64,7 @@ def _catalog_colors() -> dict:
         if bgr:
             colors[name.lower()] = (bgr[2], bgr[1], bgr[0])
     for part in C.list_parts():
-        for name, spec in (part.get("part_defects", {}) or {}).items():
+        for name, spec in (part.get("defects", {}) or {}).items():
             bgr = spec.get("color")
             if bgr:
                 colors[name.lower()] = (bgr[2], bgr[1], bgr[0])
@@ -108,39 +101,6 @@ def _text_box(draw, text, font, padx=6, pady=5):
     return bw, bh, padx - l, pady - t
 
 
-def _line_trace(draw, seg, W, H, col, scale=1.0):
-    """QMS-style scratch mark: a THIN SLIVER outline (two near-parallel edges), drawn
-    as a closed 3-stroke polygon (black halo -> white -> colour), mirroring how
-    QMSInspector renders a line/scratch ground-truth polygon via cv2.polylines. A single
-    fat centre stroke does NOT match QMS; the real scratch has width, so we build a thin
-    lens around the reported [x1,y1,x2,y2] centreline and outline it."""
-    if not (isinstance(seg, (list, tuple)) and len(seg) == 4):
-        return None
-    import math
-    x1, y1, x2, y2 = seg
-    p1 = (x1 * W, y1 * H)
-    p2 = (x2 * W, y2 * H)
-    dx, dy = p2[0] - p1[0], p2[1] - p1[1]
-    length = math.hypot(dx, dy) or 1.0
-    # perpendicular unit vector -> half-width of the sliver (QMS scratches ~0.6% of the
-    # short side across the lens).
-    nx, ny = -dy / length, dx / length
-    hw = max(1.5, min(W, H) * 0.0035 * scale)
-    # closed lens: p1+offset -> p2+offset -> p2-offset -> p1-offset
-    poly = [
-        (p1[0] + nx * hw, p1[1] + ny * hw),
-        (p2[0] + nx * hw, p2[1] + ny * hw),
-        (p2[0] - nx * hw, p2[1] - ny * hw),
-        (p1[0] - nx * hw, p1[1] - ny * hw),
-    ]
-    # Thin, crisp trace: a 1px dark halo for contrast on bright metal + the colour
-    # edge. Keeps the scratch clearly visible without a heavy 3-stroke band.
-    base = max(1, int(min(W, H) * 0.001 * scale))
-    for c, wd in (((10, 15, 25), base + 1), (col, base)):
-        draw.line(poly + [poly[0]], fill=c, width=wd, joint="curve")
-    return (int(round(p1[0])), int(round(p1[1])))
-
-
 def _focus_color(col):
     """High-contrast outline colour: swap out low-saturation / very bright colours
     for an azure that stays visible on bright metal (mirrors QMS focus_color_for)."""
@@ -166,7 +126,7 @@ def _catalog_display_names() -> dict:
         if dn:
             names[name.lower()] = dn
     for part in C.list_parts():
-        for name, spec in (part.get("part_defects", {}) or {}).items():
+        for name, spec in (part.get("defects", {}) or {}).items():
             dn = spec.get("display_name")
             if dn:
                 names[name.lower()] = dn
@@ -194,8 +154,7 @@ def _display_name(cat: str) -> str:
 def _confidence_pct(d) -> Optional[int]:
     """Normalize a verdict's confidence (fraction 0..1 or percent 0..100) to an
     int percent, or None if absent/unparseable. Shared by every label path so
-    the box/circle/line-fallback marks show the same confidence QMS's ML chip
-    already shows for line_mark."""
+    the rendered defect marks show the same confidence metadata as the verdict."""
     conf = d.get("confidence")
     if conf is None:
         return None
@@ -442,60 +401,6 @@ def _draw_label(draw, anchor, label, col, font, W, H, occupied=None):
         occupied.append((lx, ly, lx + bw, ly + bh))
 
 
-def _defect_segs(d):
-    """Return normalized line segments for a line-shaped defect, else []."""
-    if isinstance(d.get("lines"), list):
-        return [s for s in d["lines"] if isinstance(s, (list, tuple)) and len(s) == 4]
-    if isinstance(d.get("line"), (list, tuple)) and len(d.get("line")) == 4:
-        return [d["line"]]
-    return []
-
-
-_LINE_CATS_CACHE = None
-
-
-def _line_categories() -> set:
-    """category(lower) set whose bundle annotation.shape == 'line' (global + parts)."""
-    global _LINE_CATS_CACHE
-    if _LINE_CATS_CACHE is None:
-        cats = set()
-        try:
-            cat = C.load_global_catalog()
-            for name, spec in cat.get("defects", {}).items():
-                if (spec.get("annotation") or {}).get("shape") == "line":
-                    cats.add(name.lower())
-            for part in C.list_parts():
-                for name, spec in (part.get("part_defects", {}) or {}).items():
-                    if (spec.get("annotation") or {}).get("shape") == "line":
-                        cats.add(name.lower())
-        except Exception:  # noqa
-            cats = set()
-        _LINE_CATS_CACHE = cats
-    return _LINE_CATS_CACHE
-
-
-def _is_line_defect(d) -> bool:
-    """Route to the trace path ONLY when the category's DECLARED bundle shape is
-    'line' (single source of truth). A category declared shape:'box' (e.g. line_mark,
-    a tight per-groove box) is ALWAYS drawn as a box - even if a verdict happens to
-    carry stray line geometry - so a box/line drawing decision can never be half-applied
-    by the geometry a verdict contains. This keeps runtime dispatch identical to
-    intended_primitive(), which the grounding gate asserts equals annotation.shape."""
-    return intended_primitive(d.get("category", "")) == "line"
-
-
-def intended_primitive(category: str) -> str:
-    """The primitive the renderer will draw for a category, derived from the SAME logic
-    as dispatch, so the grounding gate can assert it equals the bundle's declared
-    annotation.shape (catches a half-applied 'how it's drawn' change)."""
-    cat = str(category).lower()
-    if cat in _line_categories():
-        return "line"
-    if _SEG_BY_CATEGORY.get(cat) == "circle":
-        return "circle"
-    return "box"
-
-
 def _qms_ml_label(d) -> str:
     """QMS ML-ensemble chip text, e.g. 'Line Mark (ML 99%)'. Confidence may be a
     fraction (0..1) or a percent (0..100)."""
@@ -515,50 +420,6 @@ def _draw_qms_ml_chip(draw, label, font, W, H, occupied=None):
     draw.text((lx + dx, ly + dy), label, fill=(255, 255, 255), font=font)
     if occupied is not None:
         occupied.append((lx, ly, lx + bw, ly + bh))
-
-
-def _draw_line_defect(draw, d, W, H, colors, font, is_primary, top_idx, scale=1.0, occupied=None):
-    """Draw QMS-style thin scratch traces for a line defect and a label anchored at
-    the scratch itself (so in a multi-part frame the label sits on the right part,
-    not stacked in the whole-image corner)."""
-    col = colors.get(str(d.get("category", "")).lower(), (245, 158, 11))
-    segs = _defect_segs(d)
-    if not segs:
-        # Direction-uncertain fallback: the groove is visible but its path could not
-        # be traced end-to-end. Draw a TIGHT region box around the reported bbox so
-        # the mark is flagged in place instead of omitted.
-        bbox = d.get("bbox") or [0, 0, 0, 0]
-        if len(bbox) != 4 or (bbox[2] <= 0 and bbox[3] <= 0):
-            return top_idx
-        x0, y0, x1, y1 = _bbox_px(bbox, W, H)
-        x0, x1 = sorted((x0, x1))
-        y0, y1 = sorted((y0, y1))
-        for pad, c, wd in ((2, (10, 15, 25), 6), (0, col, 3)):
-            draw.rectangle([x0 - pad, y0 - pad, x1 + pad, y1 + pad], outline=c, width=wd)
-        if str(d.get("category", "")).lower() == "line_mark":
-            _draw_qms_ml_chip(draw, _qms_ml_label(d), font, W, H, occupied)
-        else:
-            _draw_label(draw, (x0, y0), _defect_label(d, is_primary), col, font, W, H)
-        return top_idx + 1
-    for s in segs:
-        _line_trace(draw, s, W, H, col, scale=scale)
-    # QMS renders line marks (ML-ensemble) with a red-bordered 'Line Mark (ML NN%)'
-    # chip in the top-left corner, not a per-scratch [P#] tag. Match it exactly.
-    if str(d.get("category", "")).lower() == "line_mark":
-        _draw_qms_ml_chip(draw, _qms_ml_label(d), font, W, H, occupied)
-        return top_idx + 1
-    label = _defect_label(d, is_primary)
-    bw, bh, dx, dy = _text_box(draw, label, font)
-    pts = [(s[0] * W, s[1] * H) for s in segs] + [(s[2] * W, s[3] * H) for s in segs]
-    ax = min(p[0] for p in pts)
-    ay = min(p[1] for p in pts)
-    lx, ly = _place_label((ax, ay - bh - 2), bw, bh, occupied, W, H)
-    draw.rectangle([lx, ly, lx + bw, ly + bh], fill=(12, 18, 28))
-    draw.rectangle([lx, ly, lx + bw, ly + bh], outline=col, width=2)
-    draw.text((lx + dx, ly + dy), label, fill=(255, 255, 255), font=font)
-    if occupied is not None:
-        occupied.append((lx, ly, lx + bw, ly + bh))
-    return top_idx + 1
 
 
 def _tighten_to_part(base, box):
@@ -684,7 +545,7 @@ def _draw_instance_frame(draw, inst, box_px, W, H, font):
 
 
 # --- Verdict safety-net guards (catch a fabricated / hallucinated box before drawing) ---
-_OFFPART_MIN_OVERLAP = 0.10   # a box overlapping the part silhouette by less than this is off-part
+_OFFPART_MIN_OVERLAP = 0.50   # a box overlapping the part silhouette by less than this is off-part
 _MERGE_GAP = 0.05             # normalized max gap between same-category boxes that collapse into one
 _MIN_ACTIONABLE_AREA = 0.0004  # normalized area; a lone box smaller than this is a non-actionable speck
 _DARK_CATEGORIES = {"dark_mark", "dark_spot"}
@@ -841,6 +702,64 @@ def _merge_same_category(defects):
     return [d for _b, d in items]
 
 
+def _clip_bbox_to_part(bbox, part_mask, W, H):
+    """Keep the reported rectangle on the detected part without tightening to pixels.
+
+    This changes only the portion that would extend beyond the part silhouette; it
+    does not search for or shrink the box around the defect itself.
+    """
+    if part_mask is None or cv2 is None:
+        return list(bbox)
+    x, y, w, h = [float(v) for v in bbox]
+    x0, y0, x1, y1 = x, y, x + w, y + h
+    px0, py0, px1, py1 = _bbox_px([x0, y0, max(0.0, w), max(0.0, h)], W, H)
+    if px1 <= px0 or py1 <= py0:
+        return list(bbox)
+    # Trim only the portion that lies outside the part silhouette. We do
+    # not tighten around defect pixels. The final rectangle must be entirely
+    # inside the solid outer-part silhouette.
+    max_steps = max(1, (px1 - px0) + (py1 - py0))
+    for _ in range(max_steps):
+        sub = part_mask[py0:py1, px0:px1]
+        if sub.size == 0 or bool(np.all(sub > 0)):
+            break
+        candidates = []
+        if py1 - py0 > 2:
+            candidates.append(("top", int(np.count_nonzero(sub[0] == 0))))
+            candidates.append(("bottom", int(np.count_nonzero(sub[-1] == 0))))
+        if px1 - px0 > 2:
+            candidates.append(("left", int(np.count_nonzero(sub[:, 0] == 0))))
+            candidates.append(("right", int(np.count_nonzero(sub[:, -1] == 0))))
+        if not candidates:
+            break
+        side, score = max(candidates, key=lambda item: item[1])
+        if score <= 0:
+            # Background remains only in the interior; remove the side with
+            # the largest total background count until the rectangle is valid.
+            candidates = [
+                ("top", int(np.count_nonzero(sub[0] == 0))),
+                ("bottom", int(np.count_nonzero(sub[-1] == 0))),
+                ("left", int(np.count_nonzero(sub[:, 0] == 0))),
+                ("right", int(np.count_nonzero(sub[:, -1] == 0))),
+            ]
+            side, score = max(candidates, key=lambda item: item[1])
+            if score <= 0:
+                break
+        if side == "top":
+            py0 += 1
+        elif side == "bottom":
+            py1 -= 1
+        elif side == "left":
+            px0 += 1
+        else:
+            px1 -= 1
+    # Convert the boundary-clipped pixel rectangle back to normalized coordinates.
+    nx0, ny0 = px0 / float(W), py0 / float(H)
+    nx1, ny1 = px1 / float(W), py1 / float(H)
+    return [nx0, ny0, max(0.0, nx1 - nx0), max(0.0, ny1 - ny0)]
+
+
+
 def _sanitize_region_defects(defects, part_mask, base, W, H):
     """Safety net applied before drawing (also catches an API hallucination):
       1. DROP a box that falls off the part (on background / empty space).
@@ -848,9 +767,19 @@ def _sanitize_region_defects(defects, part_mask, base, W, H):
       3. MERGE same-category boxes separated by only a tiny gap into ONE box.
       4. DROP a lone sub-actionable speck (below the actionability area gate).
     Line defects pass through untouched. Returns (kept_defects, changed)."""
-    lines = [d for d in defects if _is_line_defect(d)]
-    boxes = [d for d in defects if not _is_line_defect(d)]
+    lines = []
+    boxes = list(defects)
     changed = False
+    clipped_lines = []
+    for d in lines:
+        if isinstance(d.get("bbox"), (list, tuple)) and len(d.get("bbox")) == 4 and part_mask is not None:
+            clipped = _clip_bbox_to_part(d["bbox"], part_mask, W, H)
+            if [round(v, 6) for v in clipped] != [round(float(v), 6) for v in d["bbox"]]:
+                d = dict(d)
+                d["bbox"] = clipped
+                changed = True
+        clipped_lines.append(d)
+    lines = clipped_lines
     part_ref = 180.0
     if part_mask is not None and cv2 is not None:
         on = cv2.cvtColor(base, cv2.COLOR_RGB2GRAY)[part_mask > 0]
@@ -873,15 +802,17 @@ def _sanitize_region_defects(defects, part_mask, base, W, H):
                 if not _has_dark_content(base, bb, part_ref, W, H, cat):
                     changed = True
                     continue
-                # dark_mark is a tight near-black blotch -> hug the dark pixels.
-                # dark_spot is a soft-edged smudge -> keep the full reported footprint
-                # (shrinking to the darkest core gives a tiny box unlike the operator mark).
-                if cat == "dark_mark":
-                    tight = _tighten_dark_bbox(base, bb, part_ref, W, H, category=cat)
-                    if [round(v, 6) for v in tight] != [round(float(v), 6) for v in bb]:
-                        d = dict(d)
-                        d["bbox"] = tight
-                        changed = True
+                # Do not tighten dark_* boxes to the dark pixels. The model's
+                # reported footprint is authoritative. We only constrain the rectangle
+                # to the detected part silhouette so an annotation cannot extend into
+                # the background.
+        # Keep region boxes on the part, but do not tighten them to defect pixels.
+        if isinstance(d.get("bbox"), (list, tuple)) and len(d.get("bbox")) == 4 and part_mask is not None:
+            clipped = _clip_bbox_to_part(d["bbox"], part_mask, W, H)
+            if [round(v, 6) for v in clipped] != [round(float(v), 6) for v in d["bbox"]]:
+                d = dict(d)
+                d["bbox"] = clipped
+                changed = True
         on_part.append(d)
     # 3. merge same-category near boxes
     merged = _merge_same_category(on_part)
@@ -897,7 +828,7 @@ def _sanitize_region_defects(defects, part_mask, base, W, H):
             continue
         d.pop("_merged", None)
         final.append(d)
-    return lines + final, changed
+    return final, changed
 
 
 def render_annotated(image_path: str, verdict: dict, out_path: Optional[str] = None) -> str:
@@ -909,9 +840,7 @@ def render_annotated(image_path: str, verdict: dict, out_path: Optional[str] = N
     fscale = max(14, int(min(W, H) * 0.028))
     font = _font(fscale)
 
-    # Collect (instance, region-defects, line-defects). Region defects get the
-    # QMS segmentation + translucent fill + triple-stroke outline; line defects
-    # are drawn as scratch traces.
+    # Collect defect regions. Category-specific segmentation is applied during drawing.
     instances = verdict.get("instances")
     if isinstance(instances, list):
         order = {"DEFECT": 0, "NEEDS_REVIEW": 1, "OK": 2}
@@ -932,15 +861,15 @@ def render_annotated(image_path: str, verdict: dict, out_path: Optional[str] = N
     part_mask = _part_mask_full(base, W, H)
     cleaned = []
     for defs in groups:
-        had_boxes = any(not _is_line_defect(d) for d in defs)
+        had_boxes = bool(defs)
         kept, changed = _sanitize_region_defects(defs, part_mask, base, W, H)
-        if changed and had_boxes and not any(not _is_line_defect(d) for d in kept) \
+        if changed and had_boxes and not kept \
                 and result == "DEFECT":
             result = "NEEDS_REVIEW"
         cleaned.append(kept)
     groups = cleaned
     label_jobs = []  # (anchor, label, col, font)
-    # primary = highest-severity defect (region OR line) within each group
+    # primary = highest-severity defect within each group
     group_primary = [max(defs, key=lambda d: d.get("severity", 0), default=None)
                      for defs in groups]
     # per-instance tight part box (px): shrink a loose instance_bbox to the actual
@@ -978,8 +907,7 @@ def render_annotated(image_path: str, verdict: dict, out_path: Optional[str] = N
         overlay = arr.copy()
         for gi, defects in enumerate(groups):
             fnt, thick, _scale = group_style[gi]
-            region = [d for d in defects if not _is_line_defect(d)]
-            for d in region:
+            for d in defects:
                 job = _fill_and_outline(arr, overlay, d, W, H, colors,
                                         d is group_primary[gi], thick,
                                         multi_part=multi_part)
@@ -991,7 +919,7 @@ def render_annotated(image_path: str, verdict: dict, out_path: Optional[str] = N
 
     draw = ImageDraw.Draw(img)
 
-    # --- Phase 2: PIL labels, line traces, instance frames --------------------
+    # --- Phase 2: PIL labels and instance frames --------------------
     # Draw instance name chips FIRST and record their rects, so region/line defect
     # labels drawn afterwards can dodge them and never get painted over (the cup's
     # "Edge Chip" category label used to hide behind the "Bearing Cup" name chip).
@@ -1011,15 +939,12 @@ def render_annotated(image_path: str, verdict: dict, out_path: Optional[str] = N
         for anchor, label, col, fnt, _rrect in label_jobs:
             _draw_label(draw, anchor, label, col, fnt, W, H, occupied)
 
-    top_idx = 0
-    for gi, defects in enumerate(groups):
-        fnt, _thick, scale = group_style[gi]
-        for d in defects:
-            if _is_line_defect(d):
-                top_idx = _draw_line_defect(draw, d, W, H, colors, fnt,
-                                            d is group_primary[gi], top_idx, scale,
-                                            occupied)
-            elif cv2 is None:  # no cv2: fall back to a plain filled box + label
+    # All configured defects are region annotations; category-specific segmentation
+    # is handled by _SEG_BY_CATEGORY above.
+    if cv2 is None:
+        for gi, defects in enumerate(groups):
+            fnt, _thick, _scale = group_style[gi]
+            for d in defects:
                 _fallback_box(draw, d, W, H, colors, fnt)
 
     # QMS marks a clean part with a green border + banner (defect frames carry no

@@ -29,7 +29,6 @@ import os
 from typing import List, Optional, Tuple
 
 from . import assembler
-from . import confidence
 from . import grid
 from . import loader as C
 
@@ -51,7 +50,7 @@ def _catalog_meta() -> dict:
             "display_name": spec.get("display_name", name.replace("_", " ").title()),
         }
     for part in C.list_parts():
-        for name, spec in (part.get("part_defects", {}) or {}).items():
+        for name, spec in (part.get("defects", {}) or {}).items():
             meta[name.lower()] = {
                 "severity": spec.get("severity", 3),
                 "display_name": spec.get("display_name", name.replace("_", " ").title()),
@@ -59,39 +58,69 @@ def _catalog_meta() -> dict:
     return meta
 
 
-def build_verdict(raw: dict, meta: dict) -> dict:
-    """Expand the engine's raw decision {"defects":[{category,bbox,factors|confidence}]}
-    into a full verdict, resolving severity/display_name from the bundle and confidence
-    from <defect>.confidence_model when the engine returned by-eye `factors`."""
+def _normalize_defects(raw_defects, meta):
     defects = []
-    top = 0.0
-    for d in raw.get("defects", []) or []:
+    for d in raw_defects or []:
         cat = str(d.get("category", "")).lower()
         if not cat or "bbox" not in d:
             continue
         m = meta.get(cat, {"severity": 2, "display_name": cat.replace("_", " ").title()})
-        if "confidence" in d and d["confidence"] is not None:
-            conf = float(d["confidence"])
-        elif d.get("factors"):
-            try:
-                conf = confidence.score(cat, d["factors"])[0]
-            except ValueError:
-                conf = 0.0
-        else:
-            conf = 0.0
-        top = max(top, conf)
-        defects.append({
+        conf = float(d.get("confidence", 0.0) or 0.0)
+        item = {
             "category": cat,
+            "scope": d.get("scope", "part" if cat in meta else "global"),
             "severity": m["severity"],
-            "confidence": round(conf, 2),
-            "display_name": m["display_name"],
             "bbox": list(d["bbox"]),
-        })
-    # honor the engine's own result if given, else derive from the 0.60 band
+            "confidence": round(conf, 2),
+            "reason": d.get("reason", ""),
+            "display_name": m["display_name"],
+        }
+        if "location" in d:
+            item["location"] = d["location"]
+        defects.append(item)
+    return defects
+
+
+def build_verdict(raw: dict, meta: dict) -> dict:
+    """Normalize single-part or auto-mode model output without inventing new rules."""
+    if isinstance(raw.get("instances"), list):
+        instances = []
+        for raw_inst in raw["instances"]:
+            defects = _normalize_defects(raw_inst.get("defects"), meta)
+            result = raw_inst.get("result")
+            if result not in (_DEFECT, _REVIEW, _OK):
+                result = _OK if not defects else _REVIEW
+            inst = {
+                "part": raw_inst.get("part"),
+                "result": result,
+                "primary": raw_inst.get("primary"),
+                "needs_review_reason": raw_inst.get("needs_review_reason"),
+                "defects": defects,
+            }
+            for key in ("crop_index", "instance_bbox", "identity_confidence", "checkpoints"):
+                if key in raw_inst:
+                    inst[key] = raw_inst[key]
+            instances.append(inst)
+        return {
+            "image": raw.get("image"),
+            "mode": "auto",
+            "instances": instances,
+        }
+
+    defects = _normalize_defects(raw.get("defects"), meta)
     result = raw.get("result")
     if result not in (_DEFECT, _REVIEW, _OK):
-        result = _OK if not defects else (_DEFECT if top >= 0.60 else _REVIEW)
-    return {"result": result, "defects": defects}
+        result = _OK if not defects else _REVIEW
+
+    return {
+        "part": raw.get("part"),
+        "image": raw.get("image"),
+        "result": result,
+        "primary": raw.get("primary"),
+        "needs_review_reason": raw.get("needs_review_reason"),
+        "checkpoints": raw.get("checkpoints", []) or [],
+        "defects": defects,
+    }
 
 
 # ------------------------------------------------------------------- API engine call
@@ -225,8 +254,21 @@ def main(argv=None) -> int:
         verdict = inspect_image(part, src_path, args.model, meta)
         out = args.out if (args.image and args.out) else os.path.join(out_dir, f"{stem}_ANNOTATED.png")
         renderer.render_annotated(src_path, verdict, out)
-        cats = ", ".join(sorted({d["category"] for d in verdict["defects"]})) or "-"
-        print(f"{verdict['result']:<12} {stem}  [{cats}]")
+        if args.auto:
+            cats = ", ".join(sorted({
+                d["category"]
+                for inst in verdict.get("instances", [])
+                for d in inst.get("defects", [])
+            })) or "-"
+            result = min(
+                (inst.get("result", _REVIEW) for inst in verdict.get("instances", [])),
+                key=lambda r: {"DEFECT": 0, "NEEDS_REVIEW": 1, "OK": 2}.get(r, 3),
+                default=_REVIEW,
+            )
+        else:
+            cats = ", ".join(sorted({d["category"] for d in verdict["defects"]})) or "-"
+            result = verdict["result"]
+        print(f"{result:<12} {stem}  [{cats}]")
         n += 1
     print(f"Inspected {n} image(s); annotated -> {out_dir}")
     return 0
