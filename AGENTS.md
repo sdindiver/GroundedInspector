@@ -30,7 +30,6 @@ grounded_inspector/
 
 tools/
   check_grounding.py
-  prompt_snapshot.py
 ```
 
 Runtime path:
@@ -111,18 +110,6 @@ python -m tools.check_grounding
 ```
 
 It must pass.
-
-When prompt behavior is intentionally changed, update the prompt snapshots with:
-
-```
-python -m tools.prompt_snapshot --update
-```
-
-Then verify:
-
-```
-python -m tools.prompt_snapshot
-```
 
 Do not claim a visual result was tested unless the image was actually inspected/rendered.
 
