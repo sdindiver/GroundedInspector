@@ -29,7 +29,7 @@ API later) returns a JSON verdict, and the renderer draws it.
 
 | Kind | Where | Applies to |
 |---|---|---|
-| **Global** | `grounding/defects.json` | every part (`scope:"all"`) or opt-in |
+| **Global** | `grounding/defects.json` | every part (`scope:"all"`) |
 | **Part-specific** | `grounding/parts/<part>.json` | one part |
 
 ## Add a part
