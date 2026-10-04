@@ -243,7 +243,7 @@ def render_auto_prompt(bundle: dict) -> str:
         '      "result": "OK | DEFECT | NEEDS_REVIEW",',
         '      "primary": "<category or null>",',
         '      "needs_review_reason": "<string or null>",',
-        '      "defects": [ { "category","scope","severity","bbox":[x,y,w,h], "location","confidence","reason" } ]',
+        '      "defects": [ { "category","severity","bbox":[x,y,w,h], "location","confidence","reason" } ]',
         "    }",
         "  ]",
         "}",
