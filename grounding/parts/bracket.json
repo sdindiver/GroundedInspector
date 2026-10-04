@@ -17,7 +17,8 @@
     },
     "va": {
       "face": "front",
-      "location": "between the middle hole and the plain end-hole, on the side of the middle hole opposite the serrated hole"
+      "location": "between the middle hole and the plain end-hole, on the side of the middle hole opposite the serrated hole",
+      "prerequisite": "Before evaluating either embossing defect, establish front/back using the shared anatomy.face rules. Do not use VA presence or absence to determine orientation. Only inspect VA after the face orientation is established."
     }
   },
   "inspection": [
@@ -69,16 +70,16 @@
         0
       ],
       "decision": {
-        "check": "First establish the same front face using the bracket's overall edge and plain-hole geometry used for embossing_missing. Only after the front face is established, inspect the complete VA marking at its designated location.",
-        "defect_when": "Front face is established, VA is present, and one or more required characters is visibly incomplete, partially formed, or clearly shallower/fainter than the other VA characters.",
-        "clear_when": "Front face is established, VA is clearly present, and all required characters are fully formed with consistent visible depth and definition. A blank VA on the back face is normal and is not incomplete_embossing.",
-        "review_when": "The front/back face cannot be reliably established, or after front is established the VA characters cannot be reliably judged because glare, shadow, dirt, blur, or insufficient resolution prevents comparison of their formation or depth.",
+        "check": "After the shared VA orientation prerequisite is satisfied, inspect the VA marking at its designated location.",
+        "defect_when": "The front face is established, VA is present, and one or more required characters is visibly incomplete, partially formed, or clearly shallower/fainter than the other VA characters.",
+        "clear_when": "The front face is established, VA is clearly present, and all required characters are fully formed with consistent visible depth and definition; or the back face is established, where VA absence is normal.",
+        "review_when": "The shared face orientation cannot be reliably established, or after front is established the VA characters cannot be reliably judged because glare, shadow, dirt, blur, or insufficient resolution prevents comparison of their formation or depth.",
         "ignore": [
           "A blank VA zone on the back face; this is normal.",
           "Normal lighting variation that does not change the apparent character formation.",
           "Minor visual variation that does not clearly indicate incomplete or shallow embossing."
         ],
-        "boundary": "Incomplete/shallow embossing is a front-face-only check. Do not evaluate the VA as incomplete/shallow until the same front-face prerequisite used by embossing_missing has been established.",
+        "boundary": "This defect is only evaluated on the confirmed front face. The shared VA orientation prerequisite must be satisfied first.",
         "localization": "Tight box around the affected VA character or characters."
       }
     },
@@ -91,17 +92,17 @@
         0
       ],
       "decision": {
-        "check": "Establish front/back from the overall visible face geometry before reading the VA zone. Use the outer edge profile and plain-hole form together as cues, but do not require every cue to look textbook-clear: a front face can have plain holes whose countersink/dish is subtle or visually flattened by lighting/view angle. Do not use the presence or absence of VA to decide the face.",
-        "defect_when": "The overall face geometry establishes the front face, and the designated VA zone is blank or shows no visible VA embossing.",
-        "clear_when": "The overall face geometry establishes the back face and the VA zone is blank; or the front face is established and VA is visibly present.",
-        "review_when": "The overall edge and hole geometry is genuinely insufficient to establish front versus back.",
+        "check": "After the shared VA orientation prerequisite is satisfied, inspect the VA zone at its designated location.",
+        "defect_when": "The front face is established and the designated VA zone is blank or shows no visible VA embossing.",
+        "clear_when": "The back face is established and the VA zone is blank; or the front face is established and VA is visibly present.",
+        "review_when": "The shared face orientation cannot be reliably established.",
         "ignore": [
           "A blank VA zone used by itself to infer the back face.",
           "A subtle or visually flattened countersink/dish caused by lighting or viewing angle.",
           "Glare, shadow or dirt mistaken for a missing mark."
         ],
-        "localization": "Tight box around the designated VA zone when front face is established and VA is missing.",
-        "boundary": "Embossing_missing is a front-face-only defect. Once the overall geometry establishes the front face, a blank designated VA zone is DEFECT even if the plain-hole countersink is subtle. On a confirmed back face, a blank VA zone is normal."
+        "localization": "Tight box around the designated VA zone when the front face is established and VA is missing.",
+        "boundary": "This defect is only evaluated on the confirmed front face. The shared VA orientation prerequisite must be satisfied first; on a confirmed back face, a blank VA zone is normal."
       }
     }
   }
