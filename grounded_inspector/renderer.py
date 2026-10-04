@@ -841,6 +841,51 @@ def _merge_same_category(defects):
     return [d for _b, d in items]
 
 
+def _clip_bbox_to_part(bbox, part_mask, W, H):
+    """Keep the reported rectangle on the detected part without tightening to pixels.
+
+    This changes only the portion that would extend beyond the part silhouette; it
+    does not search for or shrink the box around the defect itself.
+    """
+    if part_mask is None or cv2 is None:
+        return list(bbox)
+    x, y, w, h = [float(v) for v in bbox]
+    x0, y0, x1, y1 = x, y, x + w, y + h
+    px0, py0, px1, py1 = _bbox_px([x0, y0, max(0.0, w), max(0.0, h)], W, H)
+    if px1 <= px0 or py1 <= py0:
+        return list(bbox)
+    # Iteratively trim the side with the most background until the rectangle is
+    # overwhelmingly on-part. This is boundary clipping, not defect-box tightening.
+    for _ in range(24):
+        sub = part_mask[py0:py1, px0:px1]
+        if sub.size == 0 or float((sub > 0).mean()) >= 0.995:
+            break
+        candidates = []
+        if py1 - py0 > 3:
+            candidates.append(("top", float((sub[0:1] == 0).mean())))
+            candidates.append(("bottom", float((sub[-1:] == 0).mean())))
+        if px1 - px0 > 3:
+            candidates.append(("left", float((sub[:, 0:1] == 0).mean())))
+            candidates.append(("right", float((sub[:, -1:] == 0).mean())))
+        if not candidates:
+            break
+        side, score = max(candidates, key=lambda item: item[1])
+        if score <= 0:
+            break
+        if side == "top":
+            py0 += 1
+        elif side == "bottom":
+            py1 -= 1
+        elif side == "left":
+            px0 += 1
+        else:
+            px1 -= 1
+    # Convert the boundary-clipped pixel rectangle back to normalized coordinates.
+    nx0, ny0 = px0 / float(W), py0 / float(H)
+    nx1, ny1 = px1 / float(W), py1 / float(H)
+    return [nx0, ny0, max(0.0, nx1 - nx0), max(0.0, ny1 - ny0)]
+
+
 def _sanitize_region_defects(defects, part_mask, base, W, H):
     """Safety net applied before drawing (also catches an API hallucination):
       1. DROP a box that falls off the part (on background / empty space).
@@ -873,15 +918,17 @@ def _sanitize_region_defects(defects, part_mask, base, W, H):
                 if not _has_dark_content(base, bb, part_ref, W, H, cat):
                     changed = True
                     continue
-                # dark_mark is a tight near-black blotch -> hug the dark pixels.
-                # dark_spot is a soft-edged smudge -> keep the full reported footprint
-                # (shrinking to the darkest core gives a tiny box unlike the operator mark).
-                if cat in {"dark_mark", "dark_spot"}:
-                    tight = _tighten_dark_bbox(base, bb, part_ref, W, H, category=cat)
-                    if [round(v, 6) for v in tight] != [round(float(v), 6) for v in bb]:
-                        d = dict(d)
-                        d["bbox"] = tight
-                        changed = True
+                # Do not tighten dark_* boxes to the dark pixels. The model's
+                # reported footprint is authoritative. We only constrain the rectangle
+                # to the detected part silhouette so an annotation cannot extend into
+                # the background.
+        # Keep region boxes on the part, but do not tighten them to defect pixels.
+        if isinstance(d.get("bbox"), (list, tuple)) and len(d.get("bbox")) == 4 and part_mask is not None:
+            clipped = _clip_bbox_to_part(d["bbox"], part_mask, W, H)
+            if [round(v, 6) for v in clipped] != [round(float(v), 6) for v in d["bbox"]]:
+                d = dict(d)
+                d["bbox"] = clipped
+                changed = True
         on_part.append(d)
     # 3. merge same-category near boxes
     merged = _merge_same_category(on_part)
