@@ -71,7 +71,7 @@ def _catalog_colors() -> dict:
         if bgr:
             colors[name.lower()] = (bgr[2], bgr[1], bgr[0])
     for part in C.list_parts():
-        for name, spec in (part.get("part_defects", {}) or {}).items():
+        for name, spec in (part.get("defects", {}) or {}).items():
             bgr = spec.get("color")
             if bgr:
                 colors[name.lower()] = (bgr[2], bgr[1], bgr[0])
@@ -166,7 +166,7 @@ def _catalog_display_names() -> dict:
         if dn:
             names[name.lower()] = dn
     for part in C.list_parts():
-        for name, spec in (part.get("part_defects", {}) or {}).items():
+        for name, spec in (part.get("defects", {}) or {}).items():
             dn = spec.get("display_name")
             if dn:
                 names[name.lower()] = dn
@@ -465,7 +465,7 @@ def _line_categories() -> set:
                 if (spec.get("annotation") or {}).get("shape") == "line":
                     cats.add(name.lower())
             for part in C.list_parts():
-                for name, spec in (part.get("part_defects", {}) or {}).items():
+                for name, spec in (part.get("defects", {}) or {}).items():
                     if (spec.get("annotation") or {}).get("shape") == "line":
                         cats.add(name.lower())
         except Exception:  # noqa
