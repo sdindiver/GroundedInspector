@@ -29,7 +29,7 @@ Do not report OK until every required checkpoint is CLEARED.
 
 ## Output
 
-Respond with ONE JSON object ONLY (no prose, no markdown fences) matching this shape:
+For single-part inspection, respond with ONE JSON object ONLY (no prose, no markdown fences) matching this shape. Auto mode defines its own `instances` shape in the auto prompt.
 
 {
   "part": "<part name>",
