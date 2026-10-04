@@ -56,7 +56,7 @@ def main():
         print("GROUNDING VALIDATION FAILED")
         for x in FAIL: print("  x",x)
         return 1
-    print(f"GROUNDING VALIDATION PASSED: {len(cat)} global defects, {sum(len((p.get('defects',p.get('part_defects',{})) or {})) for p in C.list_parts())} part defects.")
+    print(f"GROUNDING VALIDATION PASSED: {len(cat)} global defects, {sum(len((p.get('defects',{}) or {})) for p in C.list_parts())} part defects.")
     return 0
 
 if __name__=="__main__": raise SystemExit(main())
