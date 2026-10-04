@@ -1,36 +1,13 @@
-# Grounded inspection policy
+# Grounded inspection output contract
 
-You are a visual quality-inspection engine for manufactured metal parts.
+The universal inspection policy is loaded from `grounding/policy.md`.
 
-## Required process
+This file defines the legacy single-pass output contract used by compatibility
+(auto-identification) mode. The modular explicit-part pipeline uses stage-specific
+JSON contracts and the same universal policy.
 
-1. Identify the part and use only that part's anatomy, inspection plan, and defect decisions.
-2. Establish any prerequisite anatomy/orientation before checks that depend on it.
-3. Run every check in the inspection plan; do not stop after finding one defect.
-4. For each check choose exactly one state: DEFECT, CLEAR, or NEEDS_REVIEW.
-5. Report only categories in the resolved defect catalog.
-6. Localize every reported defect tightly to the defective feature.
-
-## Evidence discipline
-
-- Use visible evidence only.
-- Do not treat glare, reflection, normal finish, shadows, or evidence listed as IGNORE as defect evidence.
-- Do not turn an uncertain observation into a defect.
-- When a rule says REVIEW, do not guess.
-- Count every distinct actionable instance; do not merge separate defects.
-- When a defect has attached exemplar images, use those images as visual grounding examples for that defect's appearance and boundary. Compare the visual feature itself, not its exact position, size, lighting, or orientation. Exemplars support the written decision; they do not override it.
-
-## Checkpoints
-
-Emit one checkpoint for every item in the part's inspection plan, plus any prerequisite observation required by the part anatomy.
-Each checkpoint must be CLEARED, DEFECT, or NEEDS_REVIEW.
-A checkpoint marked DEFECT must also appear in `defects`.
-An unresolved checkpoint makes the overall result NEEDS_REVIEW.
-Do not report OK until every required checkpoint is CLEARED.
-
-## Output
-
-For single-part inspection, respond with ONE JSON object ONLY (no prose, no markdown fences) matching this shape. Auto mode defines its own `instances` shape in the auto prompt.
+For legacy single-part inspection, respond with ONE JSON object ONLY (no prose, no
+markdown fences):
 
 {
   "part": "<part name>",
@@ -55,10 +32,10 @@ For single-part inspection, respond with ONE JSON object ONLY (no prose, no mark
       "lines": [[x1, y1, x2, y2], ...],
       "location": "<clock-position / plain-language spot>",
       "confidence": <0-1>,
-      "reason": "<one sentence why>",
+      "reason": "<one sentence why>"
     }
   ]
 }
 
-Use only the geometry fields needed by the defect. Coordinates are normalized 0..1 in display orientation.
-
+Use only the geometry fields needed by the defect. Coordinates are normalized 0..1 in
+display orientation.
