@@ -58,16 +58,10 @@ def _catalog_meta() -> dict:
     return meta
 
 
-def build_verdict(raw: dict, meta: dict) -> dict:
-    """Normalize the engine verdict without dropping fields required by the output contract.
-
-    Grounding resolves catalog metadata (severity/display_name), while the model's
-    evidence fields (reason, location, lines, checkpoints, review reason, etc.) are
-    preserved so the renderer and callers see the complete verdict.
-    """
+def _normalize_defects(raw_defects, meta):
     defects = []
     top = 0.0
-    for d in raw.get("defects", []) or []:
+    for d in raw_defects or []:
         cat = str(d.get("category", "")).lower()
         if not cat or "bbox" not in d:
             continue
@@ -87,12 +81,41 @@ def build_verdict(raw: dict, meta: dict) -> dict:
             if key in d:
                 item[key] = d[key]
         defects.append(item)
+    return defects, top
 
+
+def build_verdict(raw: dict, meta: dict) -> dict:
+    """Normalize single-part or auto-mode model output without inventing new rules."""
+    if isinstance(raw.get("instances"), list):
+        instances = []
+        for raw_inst in raw["instances"]:
+            defects, top = _normalize_defects(raw_inst.get("defects"), meta)
+            result = raw_inst.get("result")
+            if result not in (_DEFECT, _REVIEW, _OK):
+                result = _OK if not defects else (_DEFECT if top >= 0.60 else _REVIEW)
+            inst = {
+                "part": raw_inst.get("part"),
+                "result": result,
+                "primary": raw_inst.get("primary"),
+                "needs_review_reason": raw_inst.get("needs_review_reason"),
+                "defects": defects,
+            }
+            for key in ("crop_index", "instance_bbox", "identity_confidence", "checkpoints"):
+                if key in raw_inst:
+                    inst[key] = raw_inst[key]
+            instances.append(inst)
+        return {
+            "image": raw.get("image"),
+            "mode": "auto",
+            "instances": instances,
+        }
+
+    defects, top = _normalize_defects(raw.get("defects"), meta)
     result = raw.get("result")
     if result not in (_DEFECT, _REVIEW, _OK):
         result = _OK if not defects else (_DEFECT if top >= 0.60 else _REVIEW)
 
-    verdict = {
+    return {
         "part": raw.get("part"),
         "image": raw.get("image"),
         "result": result,
@@ -101,7 +124,6 @@ def build_verdict(raw: dict, meta: dict) -> dict:
         "checkpoints": raw.get("checkpoints", []) or [],
         "defects": defects,
     }
-    return verdict
 
 
 # ------------------------------------------------------------------- API engine call
