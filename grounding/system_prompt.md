@@ -54,9 +54,17 @@ Respond with ONE JSON object ONLY (no prose, no markdown fences) matching this s
       "lines": [[x1, y1, x2, y2], ...],
       "location": "<clock-position / plain-language spot>",
       "confidence": <0-1>,
-      "reason": "<one sentence why>"
+      "reason": "<one sentence why>",
+      "confidence_factors": {
+        "<factor name from the defect confidence model>": <0-1>
+      }
     }
   ]
 }
 
 Use only the geometry fields needed by the defect. Coordinates are normalized 0..1 in display orientation.
+
+
+## Confidence discipline
+
+When a defect has a `confidence_model` in its catalog decision, judge the model's named confidence factors from visible evidence and emit them in `confidence_factors`. Do not invent a percentage independently of those factors. The runtime computes the final confidence from the catalog weights. For `serration_missing`, confidence factors must describe the largest hole's OUTER RIM only: never use bore brightness, bore damage, countersink fill, or bore appearance as evidence of missing serration.
