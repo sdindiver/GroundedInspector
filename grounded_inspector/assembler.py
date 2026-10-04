@@ -96,24 +96,28 @@ def _warnings(golden, defects, image_path):
     return w
 
 
-def render_prompt(bundle: dict) -> str:
-    lines = [_system_prompt(), "\n---\n", f"# PART: {bundle['part']}"]
-    if bundle["part_description"]:
-        lines.append(bundle["part_description"])
-    if bundle.get("anatomy"):
-        lines.append("## ANATOMY")
-        lines.append(json.dumps(bundle["anatomy"], ensure_ascii=False, indent=2))
-    if bundle.get("inspection"):
-        lines.append("## INSPECTION PLAN")
-        lines.append(" → ".join(bundle["inspection"]))
-    lines.append("")
-    lines.append("## DEFECT DECISIONS (only these categories may be reported)")
-    _render_defects(lines, bundle["defects"])
-    lines.append("")
-    lines.append("## IMAGES ATTACHED")
-    for g in bundle["golden_images"]:
-        lines.append(f"- GOLDEN reference: {_rel(g)}")
-    for d in bundle["defects"]:
+def _append_part_context(lines: List[str], part: dict, *, compact: bool = False) -> None:
+    if compact:
+        if part.get("description"):
+            lines.append("DESCRIPTION: " + part["description"])
+        if part.get("anatomy"):
+            lines.append("ANATOMY: " + json.dumps(part["anatomy"], ensure_ascii=False))
+        if part.get("inspection"):
+            lines.append("INSPECTION: " + " → ".join(part["inspection"]))
+        lines.append("DEFECT DECISIONS:")
+    else:
+        if part.get("description"):
+            lines.append(part["description"])
+        if part.get("anatomy"):
+            lines.extend(["## ANATOMY", json.dumps(part["anatomy"], ensure_ascii=False, indent=2)])
+        if part.get("inspection"):
+            lines.extend(["## INSPECTION PLAN", " → ".join(part["inspection"])])
+        lines.extend(["", "## DEFECT DECISIONS (only these categories may be reported)"])
+    _render_defects(lines, part["defects"])
+
+
+def _append_exemplar_images(lines: List[str], defects) -> None:
+    for d in defects:
         for pair in C.pair_exemplars(d["reference_images"]):
             cap = f" - {pair['caption']}" if pair.get("caption") else ""
             if pair["full"]:
@@ -125,13 +129,21 @@ def render_prompt(bundle: dict) -> str:
                 lines.append(
                     f"  -> LOCALIZED CROP of {d['category']}: {_rel(pair['crop'])}"
                 )
-    lines.append(f"- INPUT to inspect: {_rel(bundle['image'])}")
+
+
+def render_prompt(bundle: dict) -> str:
+    lines = [_system_prompt(), "\n---\n", f"# PART: {bundle['part']}"]
+    _append_part_context(lines, bundle)
     lines.append("")
+    lines.append("## IMAGES ATTACHED")
+    for g in bundle["golden_images"]:
+        lines.append(f"- GOLDEN reference: {_rel(g)}")
+    _append_exemplar_images(lines, bundle["defects"])
+    lines.append(f"- INPUT to inspect: {_rel(bundle['image'])}")
     if bundle["warnings"]:
-        lines.append("## GROUNDING WARNINGS")
+        lines.extend(["", "## GROUNDING WARNINGS"])
         lines.extend("- " + w for w in bundle["warnings"])
-        lines.append("")
-    lines.append("Now inspect the INPUT image and return the JSON verdict only.")
+    lines.extend(["", "Now inspect the INPUT image and return the JSON verdict only."])
     return "\n".join(lines)
 
 
@@ -197,26 +209,16 @@ def render_auto_prompt(bundle: dict) -> str:
         "golden reference. Then inspect it using only that part's anatomy, "
         "inspection plan and defect decisions."
     )
-    if multi:
-        lines.append(
-            f"Inspect EACH of the {len(crops)} attached part crops independently; "
-            "return one instance per crop in crop order. Coordinates are crop-local."
-        )
-    else:
-        lines.append(
-            "Find each distinct part instance, identify it, inspect it at full "
-            "resolution, and return one instance per part."
-        )
+    lines.append(
+        (f"Inspect EACH of the {len(crops)} attached part crops independently; "
+         "return one instance per crop in crop order. Coordinates are crop-local.")
+        if multi else
+        "Find each distinct part instance, identify it, inspect it at full "
+        "resolution, and return one instance per part."
+    )
     for p in bundle["parts"]:
         lines.append(f"\n## PART: {p['part']}")
-        if p.get("description"):
-            lines.append("DESCRIPTION: " + p["description"])
-        if p.get("anatomy"):
-            lines.append("ANATOMY: " + json.dumps(p["anatomy"], ensure_ascii=False))
-        if p.get("inspection"):
-            lines.append("INSPECTION: " + " → ".join(p["inspection"]))
-        lines.append("DEFECT DECISIONS:")
-        _render_defects(lines, p["defects"])
+        _append_part_context(lines, p, compact=True)
     lines.append("\n## IMAGES ATTACHED")
     for p in bundle["parts"]:
         for g in p["golden_images"]:
@@ -253,3 +255,4 @@ def render_auto_prompt(bundle: dict) -> str:
         lines += ["## GROUNDING WARNINGS"] + ["- " + w for w in bundle["warnings"]] + [""]
     lines.append("Now inspect and return the JSON verdict only.")
     return "\n".join(lines)
+
