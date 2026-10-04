@@ -1,13 +1,180 @@
 {
   "schema_version": 2,
   "defects": {
-    "corrosion": {"severity":2,"display_name":"Corrosion","color":[30,90,160],"scope":"all","decision":{"check":"All visible faces, walls, rims and edges.","defect_when":"Brown, orange or red mottled oxidation with rough texture on intact metal.","clear_when":"No localized corrosion pattern is visible.","review_when":"Color or texture is too obscured to distinguish corrosion from finish or shadow.","ignore":["Uniform plating/passivation tint.","Shadow without oxidation texture."],"boundary":"Missing material or a broken silhouette is edge_chip."}},
-    "line_mark": {"severity":3,"display_name":"Line Mark","color":[0,220,255],"scope":"all","decision":{"check":"Sweep the complete visible surface and follow any candidate line end-to-end.","defect_when":"One thin, defined, continuous bright/bare-metal groove runs across a substantial distance of the surface.","clear_when":"Only normal grain, short polishing streaks, or no continuous groove is visible.","review_when":"Glare, blur or occlusion prevents deciding whether a candidate line is continuous and defined.","ignore":["Dark or near-black marks.","Many short parallel finish-grain lines.","Broad specular gradients."],"boundary":"A localized 3D depression is dent; a dark connected patch is dark_mark."}},
-    "dent": {"severity":4,"display_name":"Dent","color":[0,140,255],"scope":"all","decision":{"check":"Sweep faces, rims, edges, collars and flanges for contour changes.","defect_when":"Metal is pushed/deformed inward while material remains present, with a localized broken contour or depression.","clear_when":"The contour is intact and no localized 3D deformation is visible.","review_when":"There is not enough depth/contour evidence to distinguish deformation from a line or reflection.","ignore":["Flat thin continuous bright lines.","Specular highlights on an intact contour."],"boundary":"Missing material is edge_chip; a flat continuous groove is line_mark."}},
-    "edge_chip": {"severity":4,"display_name":"Edge Chip","color":[0,200,255],"scope":"all","decision":{"check":"Trace the entire outer silhouette, rim and every flange/edge.","defect_when":"A notch, sheared break or chipped section shows material missing from an otherwise continuous silhouette.","clear_when":"The full visible silhouette is intact.","review_when":"The edge is cropped, blurred or obscured where a break may exist.","ignore":["Reddish staining on an intact edge.","Pushed-in material with no missing section."],"boundary":"Reddish oxidation on intact metal is corrosion; deformation without missing material is dent."}},
-    "dark_mark": {"severity":1,"display_name":"Dark Marks","color":[40,40,220],"scope":"all","decision":{"check":"Sweep the whole visible surface, every outer edge/rim and every hole/feature border.","defect_when":"A connected near-black blotch or elongated smear forms one solid dark area.","clear_when":"No connected near-black blemish is present.","review_when":"Darkness or connectivity cannot be resolved because of glare, shadow or low resolution.","ignore":["Rainbow/passivation tint.","Hole bore or its shadow.","Loose separated specks; those are dark_spot."],"enumeration":"Report every distinct connected dark_mark with its own tight box."}},
-    "dark_spot": {"severity":1,"display_name":"Dark Spots","color":[90,90,190],"scope":"all","decision":{"check":"Sweep the whole visible surface, every outer edge/rim and every hole/feature border.","defect_when":"A discrete, bounded dark speck is clearly darker than its surrounding finish and has a visible footprint.","clear_when":"No actionable discrete dark speck is present.","review_when":"A candidate is too small, diffuse or obscured to decide whether it is a real bounded spot.","ignore":["Uniform plating/passivation tint.","Hole bore/shadow.","Specular glare.","Diffuse haze without a boundary.","One connected blotch; that is dark_mark."],"enumeration":"Report every distinct actionable spot separately; never merge separated spots."}},
-    "white_mark": {"severity":1,"display_name":"White Mark","color":[255,220,180],"scope":"all","decision":{"check":"Sweep the whole visible surface, edges/rims and feature borders.","defect_when":"A localized pale/dull low-luster patch contrasts with surrounding metal while underlying grain remains visible.","clear_when":"No localized dull/pale patch is present.","review_when":"Brightness and luster are too obscured to distinguish a dull patch from glare.","ignore":["Specular highlight that is brighter and washes out grain.","Uniform overall finish tint."]}},
-    "logo_missing": {"severity":3,"display_name":"Logo Missing","color":[200,60,200],"scope":"opt_in","decision":{"check":"Inspect the part's declared logo/marking location against its reference definition.","defect_when":"The required logo/marking is absent, incomplete or illegible at its designated location.","clear_when":"The required marking is present, complete and legible.","review_when":"The designated marking is obscured enough that completeness or legibility cannot be decided.","ignore":["A blank area that is not the declared logo location."]}}
+    "corrosion": {
+      "severity": 2,
+      "display_name": "Corrosion",
+      "color": [
+        30,
+        90,
+        160
+      ],
+      "scope": "all",
+      "decision": {
+        "check": "All visible faces, walls, rims and edges.",
+        "defect_when": "Brown, orange or red mottled oxidation with rough texture on intact metal.",
+        "clear_when": "No localized corrosion pattern is visible.",
+        "review_when": "Color or texture is too obscured to distinguish corrosion from finish or shadow.",
+        "ignore": [
+          "Uniform plating/passivation tint.",
+          "Shadow without oxidation texture."
+        ],
+        "boundary": "Missing material or a broken silhouette is edge_chip."
+      }
+    },
+    "line_mark": {
+      "severity": 3,
+      "display_name": "Line Mark",
+      "color": [
+        0,
+        220,
+        255
+      ],
+      "scope": "all",
+      "decision": {
+        "check": "Sweep the complete visible surface and follow any candidate line end-to-end.",
+        "defect_when": "One thin, defined, continuous bright/bare-metal groove runs across a substantial distance of the surface.",
+        "clear_when": "Only normal grain, short polishing streaks, or no continuous groove is visible.",
+        "review_when": "Glare, blur or occlusion prevents deciding whether a candidate line is continuous and defined.",
+        "ignore": [
+          "Dark or near-black marks.",
+          "Many short parallel finish-grain lines.",
+          "Broad specular gradients."
+        ],
+        "boundary": "A localized 3D depression is dent; a dark connected patch is dark_mark."
+      },
+      "annotation": {
+        "shape": "box",
+        "field": "bbox",
+        "instruction": "For every distinct line mark, emit one tight bbox around that mark; do not merge separate marks."
+      }
+    },
+    "dent": {
+      "severity": 4,
+      "display_name": "Dent",
+      "color": [
+        0,
+        140,
+        255
+      ],
+      "scope": "all",
+      "decision": {
+        "check": "Sweep faces, rims, edges, collars and flanges for contour changes.",
+        "defect_when": "Metal is pushed/deformed inward while material remains present, with a localized broken contour or depression.",
+        "clear_when": "The contour is intact and no localized 3D deformation is visible.",
+        "review_when": "There is not enough depth/contour evidence to distinguish deformation from a line or reflection.",
+        "ignore": [
+          "Flat thin continuous bright lines.",
+          "Specular highlights on an intact contour."
+        ],
+        "boundary": "Missing material is edge_chip; a flat continuous groove is line_mark."
+      }
+    },
+    "edge_chip": {
+      "severity": 4,
+      "display_name": "Edge Chip",
+      "color": [
+        0,
+        200,
+        255
+      ],
+      "scope": "all",
+      "decision": {
+        "check": "Trace the entire outer silhouette, rim and every flange/edge.",
+        "defect_when": "A notch, sheared break or chipped section shows material missing from an otherwise continuous silhouette.",
+        "clear_when": "The full visible silhouette is intact.",
+        "review_when": "The edge is cropped, blurred or obscured where a break may exist.",
+        "ignore": [
+          "Reddish staining on an intact edge.",
+          "Pushed-in material with no missing section."
+        ],
+        "boundary": "Reddish oxidation on intact metal is corrosion; deformation without missing material is dent."
+      }
+    },
+    "dark_mark": {
+      "severity": 1,
+      "display_name": "Dark Marks",
+      "color": [
+        40,
+        40,
+        220
+      ],
+      "scope": "all",
+      "decision": {
+        "check": "Sweep the whole visible surface, every outer edge/rim and every hole/feature border.",
+        "defect_when": "A connected near-black blotch or elongated smear forms one solid dark area.",
+        "clear_when": "No connected near-black blemish is present.",
+        "review_when": "Darkness or connectivity cannot be resolved because of glare, shadow or low resolution.",
+        "ignore": [
+          "Rainbow/passivation tint.",
+          "Hole bore or its shadow.",
+          "Loose separated specks; those are dark_spot."
+        ],
+        "enumeration": "Report every distinct connected dark_mark with its own tight box."
+      }
+    },
+    "dark_spot": {
+      "severity": 1,
+      "display_name": "Dark Spots",
+      "color": [
+        90,
+        90,
+        190
+      ],
+      "scope": "all",
+      "decision": {
+        "check": "Sweep the whole visible surface, every outer edge/rim and every hole/feature border.",
+        "defect_when": "A discrete, bounded dark speck is clearly darker than its surrounding finish and has a visible footprint.",
+        "clear_when": "No actionable discrete dark speck is present.",
+        "review_when": "A candidate is too small, diffuse or obscured to decide whether it is a real bounded spot.",
+        "ignore": [
+          "Uniform plating/passivation tint.",
+          "Hole bore/shadow.",
+          "Specular glare.",
+          "Diffuse haze without a boundary.",
+          "One connected blotch; that is dark_mark."
+        ],
+        "enumeration": "Report every distinct actionable spot separately; never merge separated spots."
+      }
+    },
+    "white_mark": {
+      "severity": 1,
+      "display_name": "White Mark",
+      "color": [
+        255,
+        220,
+        180
+      ],
+      "scope": "all",
+      "decision": {
+        "check": "Sweep the whole visible surface, edges/rims and feature borders.",
+        "defect_when": "A localized pale/dull low-luster patch contrasts with surrounding metal while underlying grain remains visible.",
+        "clear_when": "No localized dull/pale patch is present.",
+        "review_when": "Brightness and luster are too obscured to distinguish a dull patch from glare.",
+        "ignore": [
+          "Specular highlight that is brighter and washes out grain.",
+          "Uniform overall finish tint."
+        ]
+      }
+    },
+    "logo_missing": {
+      "severity": 3,
+      "display_name": "Logo Missing",
+      "color": [
+        200,
+        60,
+        200
+      ],
+      "scope": "opt_in",
+      "decision": {
+        "check": "Inspect the part's declared logo/marking location against its reference definition.",
+        "defect_when": "The required logo/marking is absent, incomplete or illegible at its designated location.",
+        "clear_when": "The required marking is present, complete and legible.",
+        "review_when": "The designated marking is obscured enough that completeness or legibility cannot be decided.",
+        "ignore": [
+          "A blank area that is not the declared logo location."
+        ]
+      }
+    }
   }
 }
