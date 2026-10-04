@@ -216,10 +216,10 @@ def _segment_defect(arr_rgb, bbox, method):
         if circles is not None:
             c = circles[0][0]
             cx, cy, rad = float(c[0]), float(c[1]), float(c[2])
-        # Draw the ring LARGER than the hole so the hole stays visible inside it,
-        # but never larger than the box (countersunk holes make HoughCircles grab the
-        # wide bevel / fall back to a big radius, which x2 would balloon).
-        rad = min(rad * 2.0, min(rw, rh) * 0.5)
+        # The locator must trace the bore itself. Do not inflate the detected
+        # radius: the rendered circle should coincide with the hole/bore boundary,
+        # rather than surrounding it with an oversized ring.
+        rad = min(rad, min(rw, rh) * 0.5)
         poly = cv2.ellipse2Poly((int(x0 + cx), int(y0 + cy)),
                                 (int(rad), int(rad)), 0, 0, 360, 6)
         return [poly.reshape(-1, 1, 2).astype(np.int32)]
