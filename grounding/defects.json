@@ -96,18 +96,18 @@
       ],
       "decision": {
         "check": "Sweep the whole visible surface, every outer edge/rim and every hole/feature border.",
-        "defect_when": "A connected dark blemish forms a clearly defined patch or elongated smear on the metal surface. It may be dark gray, brown-black, or near-black; it does not need to be uniformly near-black.",
-        "clear_when": "No connected, clearly defined dark patch or smear is present.",
-        "review_when": "A candidate dark region cannot be separated from normal finish, glare, shadow, or lighting gradient.",
+        "defect_when": "A clearly visible, distinct dark surface blemish is present on the metal and is significant enough to be a reportable marking. It may be small or large, dark gray, brown-black, or near-black. When the blemish is connected, patch-like, irregular, or elongated, classify it as dark_mark.",
+        "clear_when": "No clearly visible, distinct, reportable dark surface marking is present.",
+        "review_when": "A candidate dark region cannot be reliably separated from normal finish, glare, shadow, lighting gradient, or image noise.",
         "ignore": [
           "Rainbow/passivation tint.",
           "Hole bore or its shadow.",
           "Diffuse lighting gradients without a bounded blemish.",
-          "Small isolated dark specks; those are dark_spot."
+          "Tiny incidental specks, isolated noise, or insignificant surface variation that would not reasonably be reported as a defect."
         ],
-        "enumeration": "Report every distinct connected dark_mark with its own tight box.",
-        "localization": "Tight box around the actual connected dark patch or smear, not the surrounding metal.",
-        "boundary": "Use dark_mark when the dark feature is connected and has a patch-like or elongated footprint. A small compact isolated blemish is dark_spot."
+        "enumeration": "Report every distinct reportable dark_mark with its own tight box.",
+        "localization": "Tight box around the actual dark marking, not the surrounding metal.",
+        "boundary": "Dark_mark is based on the character of the marking, not a minimum length or width. A small but clearly visible and reportable connected/patch-like/elongated marking is still dark_mark. A compact isolated reportable blemish is dark_spot."
       }
     },
     "dark_spot": {
@@ -120,18 +120,19 @@
       ],
       "decision": {
         "check": "Sweep the entire visible metal surface systematically, including the area around markings, holes, edges and transitions.",
-        "defect_when": "A small, compact, localized dark blemish is visibly darker than the immediately surrounding metal and has a distinct footprint. It is isolated rather than forming a broad patch or elongated smear.",
-        "clear_when": "The inspected surface has no small, isolated, bounded dark blemish.",
-        "review_when": "A localized dark feature is visible but resolution, glare or shadow prevents deciding whether it is a real surface blemish or only lighting/finish.",
+        "defect_when": "A clearly visible, distinct compact dark surface blemish is present and is significant enough to be a reportable defect. It is isolated and spot-like rather than a connected patch or elongated marking. Size alone does not make it a defect.",
+        "clear_when": "The inspected surface has no clearly visible, distinct, reportable compact dark blemish.",
+        "review_when": "A localized dark feature is visible but resolution, glare, shadow or finish variation prevents deciding whether it is a real reportable surface blemish.",
         "ignore": [
           "Hole bore or hole shadow.",
           "Uniform plating/passivation color.",
           "Specular glare.",
-          "Diffuse lighting gradient without a bounded footprint."
+          "Diffuse lighting gradient without a bounded footprint.",
+          "Tiny incidental specks, isolated image noise, or insignificant dark variation that would not reasonably be reported as a defect."
         ],
-        "boundary": "Use dark_spot only for a small, compact isolated blemish. If the dark feature is connected, broad, or elongated, classify it as dark_mark. If it is only a diffuse lighting gradient, report neither.",
-        "enumeration": "Report every distinct visible dark spot separately; do not ignore a spot merely because it is small.",
-        "localization": "Tight box around the actual small dark blemish, not the surrounding metal."
+        "boundary": "Dark_spot is based on a compact isolated reportable blemish, not a minimum pixel size. A genuinely reportable spot may be small. If the feature is connected, patch-like, irregular, or elongated, classify it as dark_mark; if it is only incidental or insignificant, report neither.",
+        "enumeration": "Report every distinct reportable dark_spot separately; do not report incidental or insignificant specks merely because they are visible.",
+        "localization": "Tight box around the actual compact dark blemish, not the surrounding metal."
       }
     },
     "white_mark": {
