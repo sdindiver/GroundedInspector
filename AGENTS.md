@@ -124,6 +124,22 @@ It must pass.
 
 Do not claim a visual result was tested unless the image was actually inspected/rendered.
 
+## Interactive dev transport discipline
+
+When driving `inspection/transport.py`'s interactive stdin/stdout adapter
+(`GROUNDED_INSPECTOR_TRANSPORT=interactive`):
+
+- A `DEFECT` reply with an empty or missing `locations` array is silently dropped by
+  `aggregator.py` and the image renders as `OK` with no error. This is correct
+  aggregator behavior, not a bug — the discipline is on the answering side.
+- Every `DEFECT` answer must include `"locations":[{"bbox":[x,y,w,h],...}]` with a
+  real, non-empty bbox. Never send `"status":"DEFECT"` with `"locations":[]`.
+- After sending an answer, confirm via `get_terminal_output` that it was received
+  and the next request advanced as expected before moving on. Do not assume an
+  answer landed from memory/narration alone.
+- `transport._call_model_interactive` validates this contract and raises
+  immediately on a malformed `DEFECT` reply instead of letting it through.
+
 ## Authoring rule
 
 If a field has no current runtime consumer, remove it instead of documenting it as "future use".

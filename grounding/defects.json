@@ -99,16 +99,16 @@
       ],
       "decision": {
         "check": "Sweep the whole visible surface, every outer edge/rim and every hole/feature border.",
-        "defect_when": "A surface mark or patch is unmistakably very dark / near-black, with strong tonal contrast against the surrounding metal. Darkness is the primary defining characteristic. The feature may have any shape; it does not need to be connected, elongated, or patch-shaped.",
-        "clear_when": "No surface mark is unmistakably very dark / near-black with strong tonal contrast against the surrounding metal.",
-        "review_when": "The candidate feature is visible but glare, shadow, blur, exposure, or finish variation prevents deciding whether it is unmistakably very dark / near-black.",
+        "defect_when": "A surface mark or patch is unmistakably black or near-black in hue (not brown, tan, or rust-toned), with strong tonal contrast against the surrounding metal. Color (near-black hue), not contrast alone, is the primary defining characteristic. The feature may have any shape; it does not need to be connected, elongated, or patch-shaped.",
+        "clear_when": "No surface mark is black or near-black in hue with strong tonal contrast against the surrounding metal.",
+        "review_when": "The candidate feature is visible but glare, shadow, blur, exposure, or finish variation prevents deciding whether its hue is unmistakably black / near-black.",
         "ignore": [
-          "Rainbow/passivation tint that is not itself unmistakably very dark / near-black.",
+          "Rainbow/passivation tint that is not itself black or near-black in hue.",
           "Hole bore or hole shadow.",
           "Diffuse lighting gradients without a distinct surface mark.",
-          "A localized dark discoloration that is not unmistakably very dark / near-black; if otherwise reportable, that is dark_spot."
+          "A localized dark discoloration that is brown, tan, rust-toned, or otherwise not black/near-black in hue, even if strongly contrasting; if otherwise reportable, that is dark_spot or corrosion, not dark_mark."
         ],
-        "boundary": "Darkness is the primary defining characteristic of dark_mark. Use dark_mark when the surface feature is unmistakably very dark / near-black with strong tonal contrast, regardless of its shape. The same physical feature must never be reported as both dark_mark and dark_spot; if it qualifies as dark_mark, do not report that same feature as dark_spot.",
+        "boundary": "Hue (black / near-black), not contrast or darkness magnitude alone, is the primary defining characteristic of dark_mark. A brown, tan, or rust-toned patch is never dark_mark regardless of how strongly it contrasts with the surrounding metal \u2014 classify it as dark_spot or corrosion instead. The same physical feature must never be reported as both dark_mark and dark_spot; if it qualifies as dark_mark, do not report that same feature as dark_spot.",
         "enumeration": "Report every distinct physical dark_mark separately, with its own tight box.",
         "localization": "Tight box around the actual very dark / near-black surface mark or patch, not the surrounding metal."
       }
