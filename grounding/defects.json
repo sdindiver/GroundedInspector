@@ -96,16 +96,18 @@
       ],
       "decision": {
         "check": "Sweep the whole visible surface, every outer edge/rim and every hole/feature border.",
-        "defect_when": "A connected near-black blotch or elongated smear forms one solid dark area.",
-        "clear_when": "No connected near-black blemish is present.",
-        "review_when": "Darkness or connectivity cannot be resolved because of glare, shadow or low resolution.",
+        "defect_when": "A connected dark blemish forms a clearly defined patch or elongated smear on the metal surface. It may be dark gray, brown-black, or near-black; it does not need to be uniformly near-black.",
+        "clear_when": "No connected, clearly defined dark patch or smear is present.",
+        "review_when": "A candidate dark region cannot be separated from normal finish, glare, shadow, or lighting gradient.",
         "ignore": [
           "Rainbow/passivation tint.",
           "Hole bore or its shadow.",
-          "Loose separated specks; those are dark_spot."
+          "Diffuse lighting gradients without a bounded blemish.",
+          "Small isolated dark specks; those are dark_spot."
         ],
         "enumeration": "Report every distinct connected dark_mark with its own tight box.",
-        "localization": "Tight box around each connected dark blotch."
+        "localization": "Tight box around the actual connected dark patch or smear, not the surrounding metal.",
+        "boundary": "Use dark_mark when the dark feature is connected and has a patch-like or elongated footprint. A small compact isolated blemish is dark_spot."
       }
     },
     "dark_spot": {
@@ -118,18 +120,18 @@
       ],
       "decision": {
         "check": "Sweep the entire visible metal surface systematically, including the area around markings, holes, edges and transitions.",
-        "defect_when": "A localized, bounded dark blemish is visibly darker than the immediately surrounding metal and has a distinct footprint, even if small.",
-        "clear_when": "The inspected surface has no localized bounded dark blemish.",
-        "review_when": "A localized dark feature is visible but resolution, glare or shadow prevents deciding whether it is a real surface blemish.",
+        "defect_when": "A small, compact, localized dark blemish is visibly darker than the immediately surrounding metal and has a distinct footprint. It is isolated rather than forming a broad patch or elongated smear.",
+        "clear_when": "The inspected surface has no small, isolated, bounded dark blemish.",
+        "review_when": "A localized dark feature is visible but resolution, glare or shadow prevents deciding whether it is a real surface blemish or only lighting/finish.",
         "ignore": [
           "Hole bore or hole shadow.",
           "Uniform plating/passivation color.",
           "Specular glare.",
           "Diffuse lighting gradient without a bounded footprint."
         ],
-        "boundary": "A connected dark patch or smear is dark_mark; a separated bounded dark blemish is dark_spot.",
+        "boundary": "Use dark_spot only for a small, compact isolated blemish. If the dark feature is connected, broad, or elongated, classify it as dark_mark. If it is only a diffuse lighting gradient, report neither.",
         "enumeration": "Report every distinct visible dark spot separately; do not ignore a spot merely because it is small.",
-        "localization": "Tight box around the actual dark blemish, not the surrounding metal."
+        "localization": "Tight box around the actual small dark blemish, not the surrounding metal."
       }
     },
     "white_mark": {
