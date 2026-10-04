@@ -1,0 +1,16 @@
+{
+  "schema_version": 2,
+  "rules": {
+    "ambiguity": {
+      "defect": "Report DEFECT only when defect_when is satisfied.",
+      "clear": "Report CLEAR only when clear_when is visibly satisfied.",
+      "review": "If required evidence is unreadable or competing states cannot be distinguished, use NEEDS_REVIEW."
+    },
+    "coverage": {"scan_all": true, "continue_after_defect": true},
+    "evidence": {
+      "ignore_non_defect_visuals": true,
+      "glare": "Do not use brightness, reflection, or specular glare as defect evidence unless the defect rule explicitly requires it."
+    },
+    "localization": {"tight": true, "one_box_per_distinct_defect": true}
+  }
+}
