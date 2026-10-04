@@ -60,14 +60,12 @@ def _catalog_meta() -> dict:
 
 def _normalize_defects(raw_defects, meta):
     defects = []
-    top = 0.0
     for d in raw_defects or []:
         cat = str(d.get("category", "")).lower()
         if not cat or "bbox" not in d:
             continue
         m = meta.get(cat, {"severity": 2, "display_name": cat.replace("_", " ").title()})
         conf = float(d.get("confidence", 0.0) or 0.0)
-        top = max(top, conf)
         item = {
             "category": cat,
             "scope": d.get("scope", "part" if cat in meta else "global"),
@@ -81,7 +79,7 @@ def _normalize_defects(raw_defects, meta):
             if key in d:
                 item[key] = d[key]
         defects.append(item)
-    return defects, top
+    return defects
 
 
 def build_verdict(raw: dict, meta: dict) -> dict:
@@ -89,10 +87,10 @@ def build_verdict(raw: dict, meta: dict) -> dict:
     if isinstance(raw.get("instances"), list):
         instances = []
         for raw_inst in raw["instances"]:
-            defects, top = _normalize_defects(raw_inst.get("defects"), meta)
+            defects = _normalize_defects(raw_inst.get("defects"), meta)
             result = raw_inst.get("result")
             if result not in (_DEFECT, _REVIEW, _OK):
-                result = _OK if not defects else (_DEFECT if top >= 0.60 else _REVIEW)
+                result = _OK if not defects else _REVIEW
             inst = {
                 "part": raw_inst.get("part"),
                 "result": result,
@@ -110,10 +108,10 @@ def build_verdict(raw: dict, meta: dict) -> dict:
             "instances": instances,
         }
 
-    defects, top = _normalize_defects(raw.get("defects"), meta)
+    defects = _normalize_defects(raw.get("defects"), meta)
     result = raw.get("result")
     if result not in (_DEFECT, _REVIEW, _OK):
-        result = _OK if not defects else (_DEFECT if top >= 0.60 else _REVIEW)
+        result = _OK if not defects else _REVIEW
 
     return {
         "part": raw.get("part"),
@@ -257,8 +255,21 @@ def main(argv=None) -> int:
         verdict = inspect_image(part, src_path, args.model, meta)
         out = args.out if (args.image and args.out) else os.path.join(out_dir, f"{stem}_ANNOTATED.png")
         renderer.render_annotated(src_path, verdict, out)
-        cats = ", ".join(sorted({d["category"] for d in verdict["defects"]})) or "-"
-        print(f"{verdict['result']:<12} {stem}  [{cats}]")
+        if args.auto:
+            cats = ", ".join(sorted({
+                d["category"]
+                for inst in verdict.get("instances", [])
+                for d in inst.get("defects", [])
+            })) or "-"
+            result = min(
+                (inst.get("result", _REVIEW) for inst in verdict.get("instances", [])),
+                key=lambda r: {"DEFECT": 0, "NEEDS_REVIEW": 1, "OK": 2}.get(r, 3),
+                default=_REVIEW,
+            )
+        else:
+            cats = ", ".join(sorted({d["category"] for d in verdict["defects"]})) or "-"
+            result = verdict["result"]
+        print(f"{result:<12} {stem}  [{cats}]")
         n += 1
     print(f"Inspected {n} image(s); annotated -> {out_dir}")
     return 0
