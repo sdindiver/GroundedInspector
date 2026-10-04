@@ -35,15 +35,15 @@
       ],
       "decision": {
         "check": "Sweep the complete visible surface and follow any candidate line end-to-end.",
-        "defect_when": "One thin, defined, continuous bright/bare-metal groove runs across a substantial distance of the surface.",
-        "clear_when": "Only normal grain, short polishing streaks, or no continuous groove is visible.",
+        "defect_when": "One thin, defined, continuous groove or line runs across a substantial distance of the surface. The groove may be bright, dark, bare-metal, or low-contrast; classify it from continuity and defined line-like geometry, not brightness alone.",
+        "clear_when": "Only normal grain, short polishing streaks, broad finish variation, or no continuous groove/line is visible.",
         "review_when": "Glare, blur or occlusion prevents deciding whether a candidate line is continuous and defined.",
         "ignore": [
-          "Dark or near-black marks.",
           "Many short parallel finish-grain lines.",
-          "Broad specular gradients."
+          "Broad specular gradients.",
+          "Diffuse shading or color variation without a defined continuous groove/line."
         ],
-        "boundary": "A localized 3D depression is dent; a dark connected patch is dark_mark.",
+        "boundary": "A true continuous groove/line is line_mark regardless of whether it is bright or dark. A localized 3D depression is dent; a connected patch or smear without continuous groove geometry is dark_mark.",
         "localization": "Tight box around each distinct line mark."
       }
     },
