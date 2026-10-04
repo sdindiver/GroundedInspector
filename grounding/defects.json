@@ -128,19 +128,19 @@
       ],
       "scope": "all",
       "decision": {
-        "check": "Sweep the whole visible surface, every outer edge/rim and every hole/feature border.",
-        "defect_when": "A discrete, bounded dark speck is clearly darker than its surrounding finish and has a visible footprint.",
-        "clear_when": "No actionable discrete dark speck is present.",
-        "review_when": "A candidate is too small, diffuse or obscured to decide whether it is a real bounded spot.",
+        "check": "Sweep the entire visible metal surface systematically, including the area around markings, holes, edges and transitions.",
+        "defect_when": "A localized, bounded dark blemish is visibly darker than the immediately surrounding metal and has a distinct footprint, even if small.",
+        "clear_when": "The inspected surface has no localized bounded dark blemish.",
+        "review_when": "A localized dark feature is visible but resolution, glare or shadow prevents deciding whether it is a real surface blemish.",
         "ignore": [
-          "Uniform plating/passivation tint.",
-          "Hole bore/shadow.",
+          "Hole bore or hole shadow.",
+          "Uniform plating/passivation color.",
           "Specular glare.",
-          "Diffuse haze without a boundary.",
-          "One connected blotch; that is dark_mark."
+          "Diffuse lighting gradient without a bounded footprint."
         ],
-        "enumeration": "Report every distinct actionable spot separately; never merge separated spots.",
-        "localization": "Tight box around each distinct dark spot."
+        "boundary": "A connected dark patch or smear is dark_mark; a separated bounded dark blemish is dark_spot.",
+        "enumeration": "Report every distinct visible dark spot separately; do not ignore a spot merely because it is small.",
+        "localization": "Tight box around the actual dark blemish, not the surrounding metal."
       }
     },
     "white_mark": {
