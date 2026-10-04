@@ -120,8 +120,8 @@
       ],
       "decision": {
         "check": "Sweep the entire visible metal surface systematically, including the area around markings, holes, edges and transitions.",
-        "defect_when": "A clearly visible, distinct localized dark surface blemish is present and is significant enough to be a reportable defect. The blemish may be compact, narrow, irregular, or slightly elongated; it does not need to be circular or have a minimum width. It is a localized spot-like feature, not a continuous groove or a broad connected patch.",
-        "clear_when": "The inspected surface has no clearly visible, distinct, reportable localized dark blemish.",
+        "defect_when": "A clearly visible, distinct localized dark surface blemish is present and is significant enough to be a reportable defect. The blemish may be a single compact spot, a narrow irregular spot, or a small localized cluster of multiple dark spots. It does not need to be circular or have a minimum width. A visible cluster of several meaningful dark spots in one local area is still reportable dark_spot evidence; do not dismiss it merely because each individual spot is small.",
+        "clear_when": "The inspected surface has no clearly visible, distinct, reportable localized dark blemish or localized cluster of reportable dark spots.",
         "review_when": "A localized dark feature is visible but resolution, glare, shadow or finish variation prevents deciding whether it is a real reportable surface blemish.",
         "ignore": [
           "Hole bore or hole shadow.",
@@ -130,9 +130,9 @@
           "Diffuse lighting gradient without a bounded footprint.",
           "Tiny incidental specks, isolated image noise, or insignificant dark variation that would not reasonably be reported as a defect."
         ],
-        "boundary": "Dark_spot is based on a compact isolated reportable blemish, not a minimum pixel size. A genuinely reportable spot may be small. If the feature is connected, patch-like, irregular, or elongated, classify it as dark_mark; if it is only incidental or insignificant, report neither.",
-        "enumeration": "Report every distinct reportable dark_spot separately; do not report incidental or insignificant specks merely because they are visible.",
-        "localization": "Tight box around the actual compact dark blemish, not the surrounding metal."
+        "boundary": "Dark_spot is based on a localized reportable blemish or localized cluster, not a minimum pixel size. A genuinely reportable spot may be small. Do not convert a small localized cluster into dark_mark merely because it contains several spots. Use dark_mark for a connected patch-like or clearly mark-like feature; if the feature is only incidental or insignificant, report neither.",
+        "enumeration": "Report each distinct reportable dark_spot separately when they are clearly separable. When several meaningful dark spots form one localized cluster and individual boxes would be impractical, report the cluster with one tight area box. Do not report incidental or insignificant specks merely because they are visible.",
+        "localization": "Use a tight box around the actual dark spot or the localized cluster of reportable dark spots, not the surrounding metal."
       }
     },
     "white_mark": {
