@@ -17,7 +17,7 @@ DECISION_FIELDS = {
     "ignore", "boundary", "enumeration", "localization",
 }
 PART_FIELDS = {"schema_version", "part", "description", "anatomy", "inspection", "golden_images", "defects"}
-DEFECT_FIELDS = {"severity", "display_name", "color", "scope", "reference_dir", "decision", "annotation"}
+DEFECT_FIELDS = {"severity", "display_name", "color", "decision"}
 FAIL = []
 
 
@@ -50,16 +50,8 @@ def check_defect(cat, spec, where):
         fail(f"{where}.{cat}: decision missing {sorted(missing)}")
     if not isinstance(dec.get("ignore"), list):
         fail(f"{where}.{cat}: decision ignore must be a list")
-    if not (dec.get("localization") or spec.get("annotation")):
+    if not dec.get("localization"):
         fail(f"{where}.{cat}: missing localization")
-    if spec.get("scope") not in {"all", "part"}:
-        fail(f"{where}.{cat}: scope must be 'all' or 'part'")
-    annotation = spec.get("annotation")
-    if annotation is not None:
-        if not isinstance(annotation, dict):
-            fail(f"{where}.{cat}: annotation must be an object")
-        elif annotation.get("shape") not in {"box", "line"}:
-            fail(f"{where}.{cat}: annotation.shape must be 'box' or 'line'")
 
 
 def main():
@@ -75,8 +67,6 @@ def main():
             fail(f"duplicate global defect: {name}")
         ids.add(name)
         check_defect(name, spec, "global")
-        if isinstance(spec, dict) and spec.get("scope") != "all":
-            fail(f"global catalog.{name}: global defects must use scope 'all'")
 
     for part in C.list_parts():
         p = part.get("part", "?")
@@ -98,8 +88,6 @@ def main():
             if name in cat:
                 fail(f"{p}: defect {name} duplicates a global category; keep one owner")
             check_defect(name, spec, f"part:{p}")
-            if isinstance(spec, dict) and spec.get("scope") != "part":
-                fail(f"part:{p}.{name}: part defects must use scope 'part'")
 
         plan = part.get("inspection", [])
         if not plan:
