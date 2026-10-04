@@ -15,9 +15,6 @@ API later) returns a JSON verdict, and the renderer draws it.
   - `defects.json` — global defect catalog (shared by every part)
   - `parts/<part>.json` — per-part identity, part-specific defects, rulings
   - `references/` — golden + few-shot defect exemplar images
-  - `required_grounding.json` — the build-time GATE (read only by `check_grounding.py`,
-    **not** sent to the API): pins concepts that must reach the prompt, by reference to the
-    owning field so no rule text is duplicated
 - **`grounded_inspector/`** — the code: `loader.py` (load grounding), `assembler.py`
   (build the prompt bundle), `renderer.py` (draw verdicts)
 - **`tools/check_grounding.py`** — the grounding gate; must print **PASSED** after any
