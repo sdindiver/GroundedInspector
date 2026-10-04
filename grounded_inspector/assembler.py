@@ -18,8 +18,11 @@ def is_auto(part_name: str) -> bool:
 
 
 def _system_prompt() -> str:
-    with open(os.path.join(GROUNDING_DIR, "system_prompt.md"), encoding="utf-8") as fh:
-        return fh.read()
+    parts = []
+    for name in ("policy.md", "system_prompt.md"):
+        with open(os.path.join(GROUNDING_DIR, name), encoding="utf-8") as fh:
+            parts.append(fh.read())
+    return "\n\n---\n\n".join(parts)
 
 
 def _rel(path: str) -> str:
