@@ -69,16 +69,16 @@
         0
       ],
       "decision": {
-        "check": "After the front face is established, inspect the complete VA marking at its designated location.",
-        "defect_when": "VA is present, but one or more required characters is visibly incomplete, partially formed, or clearly shallower/fainter than the other VA characters.",
-        "clear_when": "VA is clearly present and all required characters are fully formed with consistent visible depth and definition.",
-        "review_when": "The VA characters cannot be reliably judged because glare, shadow, dirt, blur, or insufficient resolution prevents comparison of their formation or depth.",
+        "check": "First establish the same front face using the bracket's overall edge and plain-hole geometry used for embossing_missing. Only after the front face is established, inspect the complete VA marking at its designated location.",
+        "defect_when": "Front face is established, VA is present, and one or more required characters is visibly incomplete, partially formed, or clearly shallower/fainter than the other VA characters.",
+        "clear_when": "Front face is established, VA is clearly present, and all required characters are fully formed with consistent visible depth and definition. A blank VA on the back face is normal and is not incomplete_embossing.",
+        "review_when": "The front/back face cannot be reliably established, or after front is established the VA characters cannot be reliably judged because glare, shadow, dirt, blur, or insufficient resolution prevents comparison of their formation or depth.",
         "ignore": [
           "A blank VA zone on the back face; this is normal.",
           "Normal lighting variation that does not change the apparent character formation.",
           "Minor visual variation that does not clearly indicate incomplete or shallow embossing."
         ],
-        "boundary": "Incomplete/shallow embossing requires a visible defect in the embossed character itself; a merely faint image caused by lighting or image quality is not enough.",
+        "boundary": "Incomplete/shallow embossing is a front-face-only check. Do not evaluate the VA as incomplete/shallow until the same front-face prerequisite used by embossing_missing has been established.",
         "localization": "Tight box around the affected VA character or characters."
       }
     },
