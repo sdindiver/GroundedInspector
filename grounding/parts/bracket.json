@@ -1,24 +1,7 @@
 {
   "schema_version": 2,
   "part": "Bracket",
-  "aliases": [
-    "bracket",
-    "strap",
-    "mounting bracket"
-  ],
   "description": "Flat stamped steel mounting bracket/strap with exactly three in-line holes: two plain holes and one serrated hole.",
-  "identity": {
-    "summary": "Flat thin elongated steel strap with rounded ends, exactly three in-line holes, one serrated/toothed hole, and a VA emboss on the front face.",
-    "distinguishing_features": [
-      "flat thin strap with rounded ends",
-      "exactly 3 in-line holes",
-      "one hole has a serrated/toothed rim and is the largest",
-      "VA emboss is expected on the front face"
-    ],
-    "not_to_confuse_with": [
-      "bearing_cup"
-    ]
-  },
   "anatomy": {
     "holes": {
       "count": 3,
@@ -55,7 +38,11 @@
     "serration_missing": {
       "severity": 4,
       "display_name": "Serration Missing",
-      "color": [200, 0, 200],
+      "color": [
+        200,
+        0,
+        200
+      ],
       "scope": "part",
       "reference_dir": "grounding/references/parts/bracket/defects/serration_missing",
       "decision": {
@@ -76,7 +63,11 @@
     "incomplete_embossing": {
       "severity": 3,
       "display_name": "Incomplete/Shallow Embossing",
-      "color": [255, 90, 0],
+      "color": [
+        255,
+        90,
+        0
+      ],
       "scope": "part",
       "reference_dir": "grounding/references/parts/bracket/defects/incomplete_embossing",
       "decision": {
@@ -96,7 +87,11 @@
     "embossing_missing": {
       "severity": 4,
       "display_name": "Embossing Missing",
-      "color": [255, 40, 0],
+      "color": [
+        255,
+        40,
+        0
+      ],
       "scope": "part",
       "reference_dir": "grounding/references/parts/bracket/defects/embossing_missing",
       "decision": {

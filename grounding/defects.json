@@ -163,26 +163,6 @@
         ],
         "localization": "Tight box around each localized dull/pale patch."
       }
-    },
-    "logo_missing": {
-      "severity": 3,
-      "display_name": "Logo Missing",
-      "color": [
-        200,
-        60,
-        200
-      ],
-      "scope": "opt_in",
-      "decision": {
-        "check": "Inspect the part's declared logo/marking location against its reference definition.",
-        "defect_when": "The required logo/marking is absent, incomplete or illegible at its designated location.",
-        "clear_when": "The required marking is present, complete and legible.",
-        "review_when": "The designated marking is obscured enough that completeness or legibility cannot be decided.",
-        "ignore": [
-          "A blank area that is not the declared logo location."
-        ],
-        "localization": "Tight box around the declared logo/marking location."
-      }
     }
   }
 }

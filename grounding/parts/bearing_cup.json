@@ -1,15 +1,69 @@
 {
-  "schema_version":2,
-  "part":"Bearing Cup",
-  "aliases":["bearing cup","cup","bearing"],
-  "description":"Round/cylindrical deep-drawn bearing cup with a rim and central bore.",
-  "identity":{"summary":"Round deep-drawn cup with a circular rim and central bore.","distinguishing_features":["round/cylindrical cup profile","continuous rim","central bore"],"not_to_confuse_with":["bracket"]},
-  "anatomy":{"bore":"central through-hole","rim":"continuous outer rim/flange"},
-  "inspection":["missing_punch","out_of_round","line_mark","dark_mark","dark_spot","white_mark","dent","edge_chip","corrosion"],
-  "include_defects":[],
-  "golden_images":["grounding/references/parts/bearing_cup/golden"],
-  "defects":{
-    "missing_punch":{"severity":5,"display_name":"Missing Punch","color":[0,0,255],"scope":"part","reference_dir":"grounding/references/parts/bearing_cup/defects/missing_punch","decision":{"check":"Inspect the central bore.","defect_when":"The expected central through-hole is absent and the center is solid/blind.","clear_when":"A genuine central through-hole is visibly present.","review_when":"Perspective, glare or occlusion prevents deciding whether the center is a through-hole.","ignore":["Dark bore interior when the hole opening is clearly present."],"localization":"Tight box around the central bore/expected punch location."}},
-    "out_of_round":{"severity":4,"display_name":"Out of Round","color":[0,90,255],"scope":"part","reference_dir":"grounding/references/parts/bearing_cup/defects/out_of_round","decision":{"check":"Trace the central bore opening and account for perspective before judging shape.","defect_when":"The bore contour is locally pinched, deformed or irregular beyond a smooth perspective ellipse.","clear_when":"The bore is a smooth circle head-on or a smooth perspective ellipse when tilted.","review_when":"The bore contour is too obscured to distinguish perspective from deformation.","ignore":["Perspective foreshortening alone.","Bore interior shading when the opening contour is intact."],"localization":"Tight box around the deformed portion of the central bore."}}
+  "schema_version": 2,
+  "part": "Bearing Cup",
+  "description": "Round/cylindrical deep-drawn bearing cup with a rim and central bore.",
+  "anatomy": {
+    "bore": "central through-hole",
+    "rim": "continuous outer rim/flange"
+  },
+  "inspection": [
+    "missing_punch",
+    "out_of_round",
+    "line_mark",
+    "dark_mark",
+    "dark_spot",
+    "white_mark",
+    "dent",
+    "edge_chip",
+    "corrosion"
+  ],
+  "include_defects": [],
+  "golden_images": [
+    "grounding/references/parts/bearing_cup/golden"
+  ],
+  "defects": {
+    "missing_punch": {
+      "severity": 5,
+      "display_name": "Missing Punch",
+      "color": [
+        0,
+        0,
+        255
+      ],
+      "scope": "part",
+      "reference_dir": "grounding/references/parts/bearing_cup/defects/missing_punch",
+      "decision": {
+        "check": "Inspect the central bore.",
+        "defect_when": "The expected central through-hole is absent and the center is solid/blind.",
+        "clear_when": "A genuine central through-hole is visibly present.",
+        "review_when": "Perspective, glare or occlusion prevents deciding whether the center is a through-hole.",
+        "ignore": [
+          "Dark bore interior when the hole opening is clearly present."
+        ],
+        "localization": "Tight box around the central bore/expected punch location."
+      }
+    },
+    "out_of_round": {
+      "severity": 4,
+      "display_name": "Out of Round",
+      "color": [
+        0,
+        90,
+        255
+      ],
+      "scope": "part",
+      "reference_dir": "grounding/references/parts/bearing_cup/defects/out_of_round",
+      "decision": {
+        "check": "Trace the central bore opening and account for perspective before judging shape.",
+        "defect_when": "The bore contour is locally pinched, deformed or irregular beyond a smooth perspective ellipse.",
+        "clear_when": "The bore is a smooth circle head-on or a smooth perspective ellipse when tilted.",
+        "review_when": "The bore contour is too obscured to distinguish perspective from deformation.",
+        "ignore": [
+          "Perspective foreshortening alone.",
+          "Bore interior shading when the opening contour is intact."
+        ],
+        "localization": "Tight box around the deformed portion of the central bore."
+      }
+    }
   }
 }
