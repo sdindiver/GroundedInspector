@@ -44,12 +44,18 @@ def _call(prompt: str, images: List[Tuple[str,str]], model: str) -> dict:
         raise ValueError(f"No JSON object found in engine reply:\n{text[:400]}")
     return json.loads(text[start:end+1])
 
+def _policy() -> str:
+    with open(os.path.join(C.GROUNDING_DIR, "policy.md"), encoding="utf-8") as fh:
+        return fh.read()
+
 def _grid_image(bundle):
     p=grid.grid_for(bundle["image"])
     return p if p and os.path.isfile(p) else None
 
 def _anatomy_prompt(bundle):
     return "\n".join([
+        _policy(),
+        "",
         "# SHARED ANATOMY INSPECTION",
         "Establish shared physical facts only. Do not classify any defect.",
         "Use visible evidence and the authored anatomy as authoritative.",
@@ -80,6 +86,8 @@ def _inspect_anatomy(bundle, model):
 
 def _defect_prompt(bundle, defect, anatomy):
     return "\n".join([
+        _policy(),
+        "",
         "# INDEPENDENT DEFECT INSPECTION",
         "Evaluate ONLY the named defect. Do not classify, mention, or suppress unrelated defects.",
         "Do not reinterpret shared anatomy. Do not use another defect as evidence.",
