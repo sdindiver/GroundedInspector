@@ -38,13 +38,11 @@ Runtime path for explicit-part inspection:
 loader -> assembler -> shared anatomy -> independent defect inspectors -> aggregator -> renderer
 ```
 
-The modular inspection pipeline is the production path for explicit-part runs:
-- shared anatomy is established once;
-- each configured defect is evaluated independently;
+The modular inspection pipeline is the production path for inspection runs:
+- explicit-part runs establish shared anatomy once, then evaluate every configured defect independently;
+- auto-identification first finds each configured part instance, then sends each identified instance through the same shared-anatomy and independent-defect stages;
 - verdict aggregation is deterministic;
 - the renderer displays the aggregated verdict and must not semantically reclassify defects.
-
-Auto-identification remains on the compatibility path until its multi-instance orchestration is migrated to the same architecture.
 
 ## Grounding schema
 
