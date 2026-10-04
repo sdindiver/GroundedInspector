@@ -15,7 +15,10 @@
       "back": "outer edge is square/sharp; plain holes are flat through-holes",
       "unresolved": "edge/countersink profile is unreadable"
     },
-    "va_location": "between the middle hole and the plain end-hole, on the side of the middle hole opposite the serrated hole"
+    "va": {
+      "face": "front",
+      "location": "between the middle hole and the plain end-hole, on the side of the middle hole opposite the serrated hole"
+    }
   },
   "inspection": [
     "orientation",
