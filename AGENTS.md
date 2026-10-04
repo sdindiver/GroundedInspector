@@ -25,6 +25,12 @@ grounding/
 grounded_inspector/
   loader.py
   assembler.py
+  inspection/
+    transport.py
+    anatomy.py
+    defect.py
+    aggregator.py
+    pipeline.py
   inspect.py
   renderer.py
 
