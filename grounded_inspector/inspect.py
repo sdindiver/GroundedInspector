@@ -29,7 +29,6 @@ import os
 from typing import List, Optional, Tuple
 
 from . import assembler
-from . import confidence
 from . import grid
 from . import loader as C
 
