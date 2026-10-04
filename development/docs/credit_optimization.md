@@ -55,7 +55,7 @@ Typing a bbox you haven't visually confirmed forces a view→adjust→view loop.
 anatomy anchor first; place it right once.
 
 ### 3. Verify the durable layer, not the pixels
-Encode fixes in `grounding/` + `renderer.py` + `required_grounding.json` so the result reproduces
+Encode fixes in `grounding/` + `renderer.py` so the result reproduces
 next session without re-viewing everything again.
 
 ---

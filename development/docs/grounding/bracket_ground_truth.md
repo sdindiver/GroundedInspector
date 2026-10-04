@@ -78,8 +78,7 @@ dark_spot 5, incomplete_embossing 1, dark_mark 1, white_mark 1, OK 4.
     groove spanning much of the part, faint but more defined than the shallow grain),
     NOT by maximum brightness and NOT by angle. The engine's first (wrong) mark grabbed
     the brighter parallel polish streak to the right (~`0.65,0.49 → 0.42,0.80`). Encoded
-    durably in `grounding/defects.json` → `line_mark.finish_grain_rule` (pinned in
-    `grounding/required_grounding.json`).
+    durably in `grounding/defects.json` → `line_mark.finish_grain_rule`.
 - **dark tiers (TWO only)** — dark_spot → dark_mark. dark_mark =
   discrete near-black solid blotch; dark_spot = a few small rounded darker spots
   (what earlier notes called "speckling" is a dark_spot; there is no dark_speckling category).
