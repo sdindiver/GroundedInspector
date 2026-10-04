@@ -99,16 +99,18 @@
       ],
       "decision": {
         "check": "Sweep the whole visible surface, every outer edge/rim and every hole/feature border.",
-        "defect_when": "A connected near-black blotch or elongated smear forms one solid dark area.",
-        "clear_when": "No connected near-black blemish is present.",
-        "review_when": "Darkness or connectivity cannot be resolved because of glare, shadow or low resolution.",
+        "defect_when": "A surface mark or patch is unmistakably very dark / near-black, with strong tonal contrast against the surrounding metal. Darkness is the primary defining characteristic. The feature may have any shape; it does not need to be connected, elongated, or patch-shaped.",
+        "clear_when": "No surface mark is unmistakably very dark / near-black with strong tonal contrast against the surrounding metal.",
+        "review_when": "The candidate feature is visible but glare, shadow, blur, exposure, or finish variation prevents deciding whether it is unmistakably very dark / near-black.",
         "ignore": [
-          "Rainbow/passivation tint.",
-          "Hole bore or its shadow.",
-          "Loose separated specks; those are dark_spot."
+          "Rainbow/passivation tint that is not itself unmistakably very dark / near-black.",
+          "Hole bore or hole shadow.",
+          "Diffuse lighting gradients without a distinct surface mark.",
+          "A localized dark discoloration that is not unmistakably very dark / near-black; if otherwise reportable, that is dark_spot."
         ],
-        "enumeration": "Report every distinct connected dark_mark with its own tight box.",
-        "localization": "Tight box around each connected dark blotch."
+        "boundary": "Darkness is the primary defining characteristic of dark_mark. Use dark_mark when the surface feature is unmistakably very dark / near-black with strong tonal contrast, regardless of its shape. The same physical feature must never be reported as both dark_mark and dark_spot; if it qualifies as dark_mark, do not report that same feature as dark_spot.",
+        "enumeration": "Report every distinct physical dark_mark separately, with its own tight box.",
+        "localization": "Tight box around the actual very dark / near-black surface mark or patch, not the surrounding metal."
       }
     },
     "dark_spot": {
@@ -121,18 +123,19 @@
       ],
       "decision": {
         "check": "Sweep the entire visible metal surface systematically, including the area around markings, holes, edges and transitions.",
-        "defect_when": "A localized, bounded dark blemish is visibly darker than the immediately surrounding metal and has a distinct footprint, even if small.",
-        "clear_when": "The inspected surface has no localized bounded dark blemish.",
-        "review_when": "A localized dark feature is visible but resolution, glare or shadow prevents deciding whether it is a real surface blemish.",
+        "defect_when": "A localized dark discoloration or spot is visibly darker than the immediately surrounding metal and has a distinct footprint, but it is not unmistakably very dark / near-black or absolute-dark. It may be irregular, elongated, clustered, or otherwise non-uniform; shape does not make it a dark_mark when the darkness threshold is not met.",
+        "clear_when": "The inspected surface has no localized dark discoloration or spot that is reportable as dark_spot and is not unmistakably very dark / near-black.",
+        "review_when": "A localized dark feature is visible but resolution, glare, shadow, exposure, or finish variation prevents deciding whether it is a real dark discoloration or whether its darkness is unmistakably near-black.",
         "ignore": [
           "Hole bore or hole shadow.",
           "Uniform plating/passivation color.",
           "Specular glare.",
-          "Diffuse lighting gradient without a bounded footprint."
+          "Diffuse lighting gradient without a bounded footprint.",
+          "Any feature that is unmistakably very dark / near-black; that feature belongs to dark_mark, not dark_spot."
         ],
-        "boundary": "A connected dark patch or smear is dark_mark; a separated bounded dark blemish is dark_spot.",
-        "enumeration": "Report every distinct visible dark spot separately; do not ignore a spot merely because it is small.",
-        "localization": "Tight box around the actual dark blemish, not the surrounding metal."
+        "boundary": "Use dark_spot for a localized dark discoloration or spot that is not unmistakably very dark / near-black. It may be irregular or clustered. Use dark_mark when darkness is unmistakably very dark / near-black with strong tonal contrast, regardless of shape. The same physical feature must never be reported as both dark_mark and dark_spot.",
+        "enumeration": "Report every distinct visible dark_spot separately; do not ignore a reportable spot merely because it is small, irregular, elongated, or clustered.",
+        "localization": "Tight box around the actual localized dark discoloration or spot, not the surrounding metal."
       }
     },
     "white_mark": {
