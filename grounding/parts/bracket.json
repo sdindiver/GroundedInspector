@@ -46,9 +46,9 @@
         200
       ],
       "decision": {
-        "check": "Inspect the largest hole and determine whether its outer rim clearly has the required serrated/toothed pattern.",
-        "defect_when": "The required serrated/toothed rim is not clearly visible on the largest hole.",
-        "clear_when": "The largest hole clearly shows the required serrated/toothed rim.",
+        "check": "Inspect the largest hole and determine whether the circumference of the bore/opening clearly has the required serrated/toothed pattern.",
+        "defect_when": "The required serrated/toothed pattern is not visibly present on the circumference of the largest hole.",
+        "clear_when": "One or more clearly visible sections of the circumference of the largest hole show the required serrated/toothed pattern. The full circumference does not need to be visible if the visible teeth clearly establish that the serration is present.",
         "review_when": "Never use NEEDS_REVIEW for serration presence. If the required teeth cannot be clearly confirmed, treat serration as missing.",
         "ignore": [
           "Bore brightness or glare.",
@@ -56,8 +56,8 @@
           "Damage or appearance inside the bore.",
           "Plain-hole appearance."
         ],
-        "boundary": "Only clear serrated/toothed teeth on the outer rim count as evidence that serration is present.",
-        "localization": "Tight box around the largest hole including its rim and bore."
+        "boundary": "Count only clearly visible teeth forming the serrated circumference of the largest hole. Teeth may be visible on only part of the circumference; a clear toothed pattern on a visible section is sufficient to establish that serration is present.",
+        "localization": "Tight box around the largest hole including the visible serrated circumference and bore."
       }
     },
     "incomplete_embossing": {
