@@ -37,7 +37,7 @@ def build_bundle(part_name:str,image_path:str)->dict:
     defects=C.resolve_defects(part,catalog); golden=C.golden_images(part)
     return {"part":part.get("part",part_name),"part_description":part.get("description",""),
             "identity":part.get("identity",{}) or {},"anatomy":part.get("anatomy",{}) or {},
-            "inspection":part.get("inspection",[]) or [],"global_rules":C.load_global_rules(),
+            "inspection":part.get("inspection",[]) or [],
             "image":os.path.abspath(image_path),"golden_images":golden,"defects":defects,
             "warnings":_warnings(golden,defects,image_path)}
 
