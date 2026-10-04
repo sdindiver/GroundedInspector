@@ -6,9 +6,11 @@
     "holes": {
       "count": 3,
       "roles": {
-        "serrated": "largest hole",
+        "serrated": "the designated serrated end-hole; in this bracket it is the end-hole intended to carry the toothed/serrated bore, typically the larger bore but not to be selected by apparent image size alone",
         "plain": "the other two holes"
-      }
+      },
+      "identification": "Identify the serrated hole by its bracket anatomy and end-hole role, not by whichever opening happens to look largest in a particular image. Perspective, viewing angle, foreshortening, lighting, and crop can make the designated serrated hole appear smaller than a plain hole. The two plain holes are the remaining holes.",
+      "inspection": "Inspect the designated serrated end-hole. Do not transfer a serration-missing verdict to a different plain hole merely because it is visually larger."
     },
     "face": {
       "purpose": "Authoritative front/back orientation rule shared by all checks that depend on face orientation.",
@@ -51,9 +53,9 @@
         200
       ],
       "decision": {
-        "check": "Inspect the largest hole and determine whether the circumference of the bore/opening clearly has the required serrated/toothed pattern.",
-        "defect_when": "The required serrated/toothed pattern is not visibly present on the circumference of the largest hole.",
-        "clear_when": "One or more clearly visible sections of the circumference of the largest hole show the required serrated/toothed pattern. The full circumference does not need to be visible if the visible teeth clearly establish that the serration is present.",
+        "check": "Inspect the designated serrated end-hole. Determine whether any clearly visible section of its bore/opening circumference has the required serrated/toothed pattern. Do not choose the target solely by apparent pixel diameter.",
+        "defect_when": "The designated serrated end-hole does not visibly show the required serrated/toothed pattern.",
+        "clear_when": "One or more clearly visible sections of the circumference of the designated serrated end-hole show the required serrated/toothed pattern. The full circumference does not need to be visible if the visible teeth clearly establish that serration is present.",
         "review_when": "Never use NEEDS_REVIEW for serration presence. If the required teeth cannot be clearly confirmed, treat serration as missing.",
         "ignore": [
           "Bore brightness or glare.",
@@ -61,7 +63,7 @@
           "Damage or appearance inside the bore.",
           "Plain-hole appearance."
         ],
-        "boundary": "Count only clearly visible teeth forming the serrated circumference of the largest hole. Teeth may be visible on only part of the circumference; a clear toothed pattern on a visible section is sufficient to establish that serration is present.",
+        "boundary": "The serration check belongs to the designated serrated end-hole. Do not switch to a plain hole because it appears larger in the image. Perspective, foreshortening, viewing angle, lighting, and crop can change apparent hole size. Any clearly visible toothed section of the designated serrated bore is sufficient for CLEAR.",
         "localization": "Tight box around the largest hole including the visible serrated circumference and bore."
       }
     },
