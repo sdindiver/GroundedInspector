@@ -707,7 +707,7 @@ def _sanitize_region_defects(defects, part_mask, base, W, H):
                 changed = True
         clipped_lines.append(d)
     lines = clipped_lines
-    # 1. off-part guard + 2. dark-content guard
+    # 1. off-part guard; defect semantics remain untouched.
     on_part = []
     for d in boxes:
         bb = d.get("bbox")
