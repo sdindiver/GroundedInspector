@@ -854,24 +854,36 @@ def _clip_bbox_to_part(bbox, part_mask, W, H):
     px0, py0, px1, py1 = _bbox_px([x0, y0, max(0.0, w), max(0.0, h)], W, H)
     if px1 <= px0 or py1 <= py0:
         return list(bbox)
-    # Iteratively trim the side with the most background until the rectangle is
-    # overwhelmingly on-part. This is boundary clipping, not defect-box tightening.
-    for _ in range(24):
+    # Trim only the portion that lies outside the part silhouette. We do
+    # not tighten around defect pixels. The final rectangle must be entirely
+    # inside the solid outer-part silhouette.
+    max_steps = max(1, (px1 - px0) + (py1 - py0))
+    for _ in range(max_steps):
         sub = part_mask[py0:py1, px0:px1]
-        if sub.size == 0 or float((sub > 0).mean()) >= 0.995:
+        if sub.size == 0 or bool(np.all(sub > 0)):
             break
         candidates = []
-        if py1 - py0 > 3:
-            candidates.append(("top", float((sub[0:1] == 0).mean())))
-            candidates.append(("bottom", float((sub[-1:] == 0).mean())))
-        if px1 - px0 > 3:
-            candidates.append(("left", float((sub[:, 0:1] == 0).mean())))
-            candidates.append(("right", float((sub[:, -1:] == 0).mean())))
+        if py1 - py0 > 2:
+            candidates.append(("top", int(np.count_nonzero(sub[0] == 0))))
+            candidates.append(("bottom", int(np.count_nonzero(sub[-1] == 0))))
+        if px1 - px0 > 2:
+            candidates.append(("left", int(np.count_nonzero(sub[:, 0] == 0))))
+            candidates.append(("right", int(np.count_nonzero(sub[:, -1] == 0))))
         if not candidates:
             break
         side, score = max(candidates, key=lambda item: item[1])
         if score <= 0:
-            break
+            # Background remains only in the interior; remove the side with
+            # the largest total background count until the rectangle is valid.
+            candidates = [
+                ("top", int(np.count_nonzero(sub[0] == 0))),
+                ("bottom", int(np.count_nonzero(sub[-1] == 0))),
+                ("left", int(np.count_nonzero(sub[:, 0] == 0))),
+                ("right", int(np.count_nonzero(sub[:, -1] == 0))),
+            ]
+            side, score = max(candidates, key=lambda item: item[1])
+            if score <= 0:
+                break
         if side == "top":
             py0 += 1
         elif side == "bottom":
@@ -896,6 +908,17 @@ def _sanitize_region_defects(defects, part_mask, base, W, H):
     lines = [d for d in defects if _is_line_defect(d)]
     boxes = [d for d in defects if not _is_line_defect(d)]
     changed = False
+    # Line defects are also region annotations: their boxes must stay on the part.
+    clipped_lines = []
+    for d in lines:
+        if isinstance(d.get("bbox"), (list, tuple)) and len(d.get("bbox")) == 4 and part_mask is not None:
+            clipped = _clip_bbox_to_part(d["bbox"], part_mask, W, H)
+            if [round(v, 6) for v in clipped] != [round(float(v), 6) for v in d["bbox"]]:
+                d = dict(d)
+                d["bbox"] = clipped
+                changed = True
+        clipped_lines.append(d)
+    lines = clipped_lines
     part_ref = 180.0
     if part_mask is not None and cv2 is not None:
         on = cv2.cvtColor(base, cv2.COLOR_RGB2GRAY)[part_mask > 0]
