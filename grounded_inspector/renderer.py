@@ -581,26 +581,27 @@ def _has_dark_content(base, bbox, part_ref, W, H, category=None):
     dark_abs = _dark_abs(part_ref, category)
     mask = (gray < dark_abs).astype(np.uint8)
 
-    # A dark_spot must contain a coherent, locally darker feature. Normal stamped
-    # texture, grain and illumination can easily put many individual pixels below
-    # the global threshold, so pixel fraction alone is not enough.
+    # A dark_spot may be a single meaningful spot or a localized cluster of
+    # several small spots. Require coherent dark content and local contrast, but
+    # do not require one large connected component.
     if str(category or "").lower() == "dark_spot":
-        n, _labels, stats, _centroids = cv2.connectedComponentsWithStats(mask, 8)
+        n, labels, stats, _centroids = cv2.connectedComponentsWithStats(mask, 8)
         if n <= 1:
             return False
         areas = stats[1:, cv2.CC_STAT_AREA]
-        largest = int(np.max(areas))
-        if largest < max(8, int(0.003 * mask.size)):
+        min_component = max(3, int(0.0008 * mask.size))
+        keep = np.zeros_like(mask, dtype=np.uint8)
+        for label, area in enumerate(areas, start=1):
+            if int(area) >= min_component:
+                keep[labels == label] = 1
+        meaningful_area = int(keep.sum())
+        if meaningful_area < max(8, int(0.003 * mask.size)):
             return False
 
-        ys, xs = np.where(mask > 0)
-        if len(xs) < largest:
-            return False
-        core = gray[ys, xs]
-        # Compare the dark core against a one-pixel-expanded surrounding ring.
-        dilated = cv2.dilate(mask, np.ones((5, 5), np.uint8), iterations=1)
-        ring = (dilated > 0) & (mask == 0)
-        if not np.any(ring):
+        core = gray[keep > 0]
+        ring_mask = cv2.dilate(keep, np.ones((5, 5), np.uint8), iterations=1)
+        ring = (ring_mask > 0) & (keep == 0)
+        if not np.any(ring) or core.size == 0:
             return False
         local_contrast = float(np.median(gray[ring])) - float(np.median(core))
         if local_contrast < 8.0:
