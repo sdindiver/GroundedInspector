@@ -21,23 +21,6 @@ def load_global_rules() -> dict:
         return {}
     return _read_json(path)
 
-def load_rules_library() -> dict:
-    # Legacy compatibility. New grounding should not need this indirection.
-    path = os.path.join(GROUNDING_DIR, "rules.json")
-    if not os.path.isfile(path):
-        return {}
-    return _read_json(path).get("rules", {})
-
-def resolve_ref(value, lib=None):
-    if isinstance(value, dict) and "$ref" in value:
-        lib = load_rules_library() if lib is None else lib
-        return lib.get(value["$ref"], "")
-    return value
-
-def resolve_ref_list(items) -> List:
-    lib = load_rules_library()
-    return [resolve_ref(it, lib) for it in (items or [])]
-
 def load_verification_config() -> dict:
     path = os.path.join(GROUNDING_DIR, "verification.json")
     return _read_json(path) if os.path.isfile(path) else {}
