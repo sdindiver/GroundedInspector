@@ -42,11 +42,6 @@
         ],
         "boundary": "A localized 3D depression is dent; a dark connected patch is dark_mark.",
         "localization": "Tight box around each distinct line mark."
-      },
-      "annotation": {
-        "shape": "box",
-        "field": "bbox",
-        "instruction": "For every distinct line mark, emit one tight bbox around that mark; do not merge separate marks."
       }
     },
     "dent": {
