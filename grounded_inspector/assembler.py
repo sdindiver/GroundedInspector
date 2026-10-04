@@ -78,6 +78,7 @@ def build_bundle(part_name: str, image_path: str) -> dict:
         "image": os.path.abspath(image_path),
         "golden_images": golden,
         "defects": defects,
+        "shared_rules": catalog.get("shared_rules", {}) or {},
         "warnings": _warnings(golden, defects, image_path),
     }
 
@@ -95,6 +96,27 @@ def _warnings(golden, defects, image_path):
             )
     return w
 
+
+def _append_shared_rules(lines: List[str], shared_rules: dict, *, compact: bool = False) -> None:
+    if not shared_rules:
+        return
+    if compact:
+        lines.append("SHARED RULES:")
+    else:
+        lines.extend(["", "## SHARED RULES (authoritative common classification rules)"])
+    for name, rule in shared_rules.items():
+        title = str(name).replace("_", " ").title()
+        lines.append(f"{title}:")
+        if isinstance(rule, dict):
+            for key, value in rule.items():
+                label = str(key).replace("_", " ").upper()
+                if isinstance(value, list):
+                    value = "; ".join(map(str, value))
+                elif isinstance(value, dict):
+                    value = json.dumps(value, ensure_ascii=False, sort_keys=True)
+                lines.append(f"    {label}: {value}")
+        else:
+            lines.append(f"    {rule}")
 
 def _append_part_context(lines: List[str], part: dict, *, compact: bool = False) -> None:
     if compact:
@@ -133,6 +155,7 @@ def _append_exemplar_images(lines: List[str], defects) -> None:
 
 def render_prompt(bundle: dict) -> str:
     lines = [_system_prompt(), "\n---\n", f"# PART: {bundle['part']}"]
+    _append_shared_rules(lines, bundle.get("shared_rules", {}))
     _append_part_context(lines, bundle)
     lines.append("")
     lines.append("## IMAGES ATTACHED")
@@ -185,6 +208,7 @@ def build_auto_bundle(image_path: str) -> dict:
             "inspection": cfg.get("inspection", []) or [],
             "golden_images": C.golden_images(cfg)[:1],
             "defects": C.resolve_defects(cfg, catalog),
+            "shared_rules": catalog.get("shared_rules", {}) or {},
         })
     warnings = []
     if not os.path.isfile(image_path):
@@ -217,6 +241,8 @@ def render_auto_prompt(bundle: dict) -> str:
         "resolution, and return one instance per part."
     )
     for p in bundle["parts"]:
+        if p.get("shared_rules"):
+            _append_shared_rules(lines, p["shared_rules"], compact=True)
         lines.append(f"\n## PART: {p['part']}")
         _append_part_context(lines, p, compact=True)
     lines.append("\n## IMAGES ATTACHED")
