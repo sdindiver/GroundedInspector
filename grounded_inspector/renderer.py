@@ -730,82 +730,6 @@ def _merge_same_category(defects):
     return [d for _b, d in items]
 
 
-def _tighten_line_mark_bbox(base, bbox, W, H):
-    """Repair an oversized/shifted line_mark box by finding the actual long,
-    high-contrast line inside a small expanded search region. Preserve the
-    original box when no reliable line is found."""
-    if cv2 is None or not isinstance(bbox, (list, tuple)) or len(bbox) != 4:
-        return list(bbox)
-    x, y, w, h = [float(v) for v in bbox]
-    if w <= 0 or h <= 0 or w * W <= max(18.0, 0.055 * W):
-        return list(bbox)
-
-    x0, y0, x1, y1 = _bbox_px(bbox, W, H)
-    if x1 <= x0 or y1 <= y0:
-        return list(bbox)
-
-    expand = max(24, int(0.12 * max(W, H)))
-    sx0, sy0 = max(0, x0 - expand), max(0, y0 - expand // 3)
-    sx1, sy1 = min(W, x1 + expand), min(H, y1 + expand // 3)
-    roi = base[sy0:sy1, sx0:sx1]
-    if roi.size == 0:
-        return list(bbox)
-
-    gray = cv2.GaussianBlur(cv2.cvtColor(roi, cv2.COLOR_RGB2GRAY), (3, 3), 0)
-    edges = cv2.Canny(gray, 30, 100)
-    search_side = max(1, max(sx1 - sx0, sy1 - sy0))
-    min_len = max(24, int(0.30 * max(x1 - x0, y1 - y0)))
-    lines = cv2.HoughLinesP(
-        edges, 1, np.pi / 180.0,
-        threshold=max(30, int(0.08 * search_side)),
-        minLineLength=min_len,
-        maxLineGap=max(12, int(0.04 * search_side)),
-    )
-    if lines is None:
-        return list(bbox)
-
-    original_cx, original_cy = (x0 + x1) / 2.0, (y0 + y1) / 2.0
-    best, best_score = None, -1.0
-    for raw in lines[:, 0]:
-        xa, ya, xb, yb = map(int, raw)
-        length = float(np.hypot(xb - xa, yb - ya))
-        if length < min_len:
-            continue
-        xa_f, ya_f, xb_f, yb_f = xa + sx0, ya + sy0, xb + sx0, yb + sy0
-        mx, my = (xa_f + xb_f) / 2.0, (ya_f + yb_f) / 2.0
-        if float(np.hypot(mx - original_cx, my - original_cy)) > max(80.0, 0.28 * max(W, H)):
-            continue
-
-        dx, dy = xb_f - xa_f, yb_f - ya_f
-        norm = max(1.0, float(np.hypot(dx, dy)))
-        nx, ny = -dy / norm, dx / norm
-        ts = np.linspace(0.08, 0.92, min(500, max(30, int(length))))
-        xs = np.clip(np.round(xa_f + dx * ts), 0, W - 1).astype(int)
-        ys = np.clip(np.round(ya_f + dy * ts), 0, H - 1).astype(int)
-        off = max(3, int(round(0.008 * max(W, H))))
-        xlo = np.clip(np.round(xs + nx * off), 0, W - 1).astype(int)
-        ylo = np.clip(np.round(ys + ny * off), 0, H - 1).astype(int)
-        xhi = np.clip(np.round(xs - nx * off), 0, W - 1).astype(int)
-        yhi = np.clip(np.round(ys - ny * off), 0, H - 1).astype(int)
-        center = base[ys, xs].astype(np.float32).mean(axis=1)
-        sides = (base[ylo, xlo].astype(np.float32).mean(axis=1) +
-                 base[yhi, xhi].astype(np.float32).mean(axis=1)) / 2.0
-        contrast = float(np.mean(center - sides))
-        if contrast < 0.5:
-            continue
-        score = length * (1.0 + min(contrast, 8.0) / 4.0)
-        if score > best_score:
-            best_score, best = score, (xa_f, ya_f, xb_f, yb_f)
-
-    if best is None:
-        return list(bbox)
-    xa, ya, xb, yb = best
-    pad = max(3, int(round(0.008 * max(W, H))))
-    nx0, ny0 = max(0, min(xa, xb) - pad), max(0, min(ya, yb) - pad)
-    nx1, ny1 = min(W, max(xa, xb) + pad), min(H, max(ya, yb) + pad)
-    return [nx0 / W, ny0 / H, (nx1 - nx0) / W, (ny1 - ny0) / H]
-
-
 def _clip_bbox_to_part(bbox, part_mask, W, H):
     """Keep the reported rectangle on the detected part without tightening to pixels.
 
@@ -901,15 +825,8 @@ def _sanitize_region_defects(defects, part_mask, base, W, H):
                     if sub.size and float((sub > 0).mean()) < _OFFPART_MIN_OVERLAP:
                         changed = True
                         continue
-            if str(d.get("category", "")).lower() in _DARK_CATEGORIES:
-                cat = str(d.get("category", "")).lower()
-                if not _has_dark_content(base, bb, part_ref, W, H, cat):
-                    changed = True
-                    continue
-                # Do not tighten dark_* boxes to the dark pixels. The model's
-                # reported footprint is authoritative. We only constrain the rectangle
-                # to the detected part silhouette so an annotation cannot extend into
-                # the background.
+            # Dark-feature semantics are owned by grounding + model inspection.
+            # The renderer only constrains reported boxes to the detected part silhouette.
         # Keep region boxes on the part, but do not tighten them to defect pixels.
         if isinstance(d.get("bbox"), (list, tuple)) and len(d.get("bbox")) == 4 and part_mask is not None:
             clipped = _clip_bbox_to_part(d["bbox"], part_mask, W, H)
@@ -918,27 +835,19 @@ def _sanitize_region_defects(defects, part_mask, base, W, H):
                 d["bbox"] = clipped
                 changed = True
         on_part.append(d)
-    # Repair only clearly oversized line_mark boxes. Normal tight line boxes
-    # remain untouched; this handles occasional laterally shifted model boxes.
-    repaired_boxes = []
-    for d in on_part:
-        if str(d.get("category", "")).lower() == "line_mark" and isinstance(d.get("bbox"), (list, tuple)) and len(d.get("bbox")) == 4:
-            repaired = _tighten_line_mark_bbox(base, d["bbox"], W, H)
-            if [round(v, 6) for v in repaired] != [round(float(v), 6) for v in d["bbox"]]:
-                d = dict(d)
-                d["bbox"] = repaired
-                changed = True
-        repaired_boxes.append(d)
-    on_part = repaired_boxes
     # 3. merge same-category near boxes
     merged = _merge_same_category(on_part)
     if len(merged) != len(on_part):
         changed = True
-    # 3. drop a lone sub-actionable speck (a merged box is already larger)
+    # 3. drop only generic sub-actionable region boxes. Dark spots are
+    # intentionally exempt because their semantic actionability is a grounding
+    # decision, not a renderer decision.
     final = []
     for d in merged:
         bb = d.get("bbox")
-        if (not d.get("_merged") and isinstance(bb, (list, tuple)) and len(bb) == 4
+        if (str(d.get("category", "")).lower() != "dark_spot"
+                and not d.get("_merged")
+                and isinstance(bb, (list, tuple)) and len(bb) == 4
                 and bb[2] * bb[3] < _MIN_ACTIONABLE_AREA):
             changed = True
             continue
