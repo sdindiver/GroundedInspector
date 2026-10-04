@@ -94,7 +94,7 @@ def resolve_defects(part: dict, catalog: Optional[dict] = None) -> List[dict]:
     resolved = []
     seen = set()
 
-    def add(cat, spec, scope, ref_dir=None):
+    def add(cat, spec, scope, ref_dir):
         key = _norm(cat)
         if key in seen:
             raise ValueError(
@@ -107,10 +107,9 @@ def resolve_defects(part: dict, catalog: Optional[dict] = None) -> List[dict]:
             "scope": scope,
             "severity": spec.get("severity", 2 if scope == "global" else 3),
             "color": spec.get("color"),
-            "annotation": spec.get("annotation"),
             "decision": decision,
             "reference_images": _images_in(
-                ref_dir or spec.get("reference_dir", "")
+                ref_dir
             ),
         })
 
@@ -124,7 +123,14 @@ def resolve_defects(part: dict, catalog: Optional[dict] = None) -> List[dict]:
             )
 
     for cat, spec in (part.get("defects", {}) or {}).items():
-        add(cat, spec, "part", spec.get("reference_dir"))
+        add(
+            cat,
+            spec,
+            "part",
+            os.path.join(
+                "grounding", "references", "parts", _norm(part["part"]), "defects", cat
+            ),
+        )
 
     resolved.sort(key=lambda d: (-d["severity"], d["scope"] != "part"))
     return resolved
