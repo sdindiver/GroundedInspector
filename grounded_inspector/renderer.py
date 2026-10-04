@@ -684,7 +684,7 @@ def _draw_instance_frame(draw, inst, box_px, W, H, font):
 
 
 # --- Verdict safety-net guards (catch a fabricated / hallucinated box before drawing) ---
-_OFFPART_MIN_OVERLAP = 0.10   # a box overlapping the part silhouette by less than this is off-part
+_OFFPART_MIN_OVERLAP = 0.50   # a box overlapping the part silhouette by less than this is off-part
 _MERGE_GAP = 0.05             # normalized max gap between same-category boxes that collapse into one
 _MIN_ACTIONABLE_AREA = 0.0004  # normalized area; a lone box smaller than this is a non-actionable speck
 _DARK_CATEGORIES = {"dark_mark", "dark_spot"}
@@ -876,7 +876,7 @@ def _sanitize_region_defects(defects, part_mask, base, W, H):
                 # dark_mark is a tight near-black blotch -> hug the dark pixels.
                 # dark_spot is a soft-edged smudge -> keep the full reported footprint
                 # (shrinking to the darkest core gives a tiny box unlike the operator mark).
-                if cat == "dark_mark":
+                if cat in {"dark_mark", "dark_spot"}:
                     tight = _tighten_dark_bbox(base, bb, part_ref, W, H, category=cat)
                     if [round(v, 6) for v in tight] != [round(float(v), 6) for v in bb]:
                         d = dict(d)
