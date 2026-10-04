@@ -29,6 +29,7 @@ from typing import List, Optional, Tuple
 
 from . import assembler
 from . import confidence
+from . import grid
 from . import loader as C
 
 _EXTS = (".png", ".jpg", ".jpeg", ".PNG", ".JPG", ".JPEG")
@@ -116,6 +117,13 @@ def _bundle_images(bundle: dict) -> List[Tuple[str, str]]:
                 imgs.append((f"DEFECT exemplar ({cat}) FULL part{cap}", pair["full"]))
             if pair["crop"]:
                 imgs.append((f"DEFECT exemplar ({cat}) LOCALIZED CROP - the defect is HERE", pair["crop"]))
+    # Attach a coordinate-grid copy of the input so the engine READS each bbox edge off
+    # the labeled gridlines instead of estimating a fraction (tighter localization). The
+    # clean input is attached LAST (as the prompt says) for judging the defect itself.
+    grid_path = grid.grid_for(bundle["image"])
+    if grid_path:
+        imgs.append(("INPUT with COORDINATE GRID - read each bbox edge off the nearest "
+                     "labeled gridline (0.00-1.00 across the top = x, down the left = y)", grid_path))
     imgs.append(("INPUT to inspect", bundle["image"]))
     return [(lbl, p) for lbl, p in imgs if p and os.path.isfile(p)]
 

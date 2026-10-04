@@ -691,11 +691,25 @@ _DARK_CATEGORIES = {"dark_mark", "dark_spot"}
 _DARK_MIN_CONTENT = 0.02      # a dark_* box needs at least this fraction of genuinely near-black pixels
 
 
-def _has_dark_content(base, bbox, part_ref, W, H):
-    """True if a dark_* box actually contains near-black pixels. Judged ABSOLUTELY
-    (dark relative to the bright part), so a box fabricated on plain grain/tint -
-    where the 'dark' segmentation's RELATIVE threshold would still find something -
-    is rejected. part_ref = median brightness of the on-part metal."""
+def _dark_abs(part_ref, category=None):
+    """Darkness cutoff (0..255 gray) for a dark_* box's content/segmentation.
+
+    dark_mark is defined as ABSOLUTE near-black, so it keeps the strict cutoff.
+    dark_spot is defined RELATIVE to the finish ('clearly darker than the surrounding
+    finish'), so on a bright bracket a faint-but-real spot (darker than the metal but
+    not near-black) must still qualify - testing it as absolute near-black is what
+    silently dropped operator-marked edge/scatter dark spots at draw time."""
+    if str(category or "").lower() == "dark_spot":
+        return min(165.0, 0.82 * float(part_ref))
+    return min(110.0, 0.55 * float(part_ref))
+
+
+def _has_dark_content(base, bbox, part_ref, W, H, category=None):
+    """True if a dark_* box actually contains pixels darker than the finish. dark_mark
+    is judged ABSOLUTELY (near-black vs the bright part); dark_spot is judged RELATIVE
+    to the on-part median (clearly darker than the finish), so a faint real spot is not
+    dropped, while a box fabricated on plain grain/tint - which is NOT darker than the
+    finish - is still rejected. part_ref = median brightness of the on-part metal."""
     if cv2 is None:
         return True  # can't verify without cv2; don't drop
     x0, y0, x1, y1 = _bbox_px(bbox, W, H)
@@ -703,13 +717,13 @@ def _has_dark_content(base, bbox, part_ref, W, H):
         return False
     roi = base[y0:y1, x0:x1]
     gray = cv2.cvtColor(roi, cv2.COLOR_RGB2GRAY)
-    dark_abs = min(110.0, 0.55 * float(part_ref))  # near-black vs the bright finish
+    dark_abs = _dark_abs(part_ref, category)
     return float((gray < dark_abs).mean()) >= _DARK_MIN_CONTENT
 
 
-def _tighten_dark_bbox(base, bbox, part_ref, W, H, margin=0.006):
-    """Shrink a (possibly loose) dark_* box to the LARGEST near-black blob inside it,
-    so the drawn box hugs the actual dark pixels instead of the surrounding tint.
+def _tighten_dark_bbox(base, bbox, part_ref, W, H, margin=0.006, category=None):
+    """Shrink a (possibly loose) dark_* box to the LARGEST darker-than-finish blob inside
+    it, so the drawn box hugs the actual dark pixels instead of the surrounding tint.
     Returns the original bbox when no clean blob is found."""
     if cv2 is None:
         return list(bbox)
@@ -718,7 +732,7 @@ def _tighten_dark_bbox(base, bbox, part_ref, W, H, margin=0.006):
         return list(bbox)
     roi = base[y0:y1, x0:x1]
     gray = cv2.cvtColor(roi, cv2.COLOR_RGB2GRAY)
-    dark_abs = min(110.0, 0.55 * float(part_ref))
+    dark_abs = _dark_abs(part_ref, category)
     mask = (gray < dark_abs).astype(np.uint8) * 255
     mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, np.ones((3, 3), np.uint8))
     n, _lbl, stats, _c = cv2.connectedComponentsWithStats(mask)
@@ -733,7 +747,17 @@ def _tighten_dark_bbox(base, bbox, part_ref, W, H, margin=0.006):
     my0 = max(0, y0 + int(cy) - pad)
     mx1 = min(W, x0 + int(cx) + int(cw) + pad)
     my1 = min(H, y0 + int(cy) + int(ch) + pad)
-    return [mx0 / W, my0 / H, (mx1 - mx0) / W, (my1 - my0) / H]
+    bw, bh = (mx1 - mx0) / W, (my1 - my0) / H
+    # Floor the hugged box so a faint small spot is not shrunk below the actionable /
+    # visible size and then dropped by the sub-actionable speck gate (the edge/scatter
+    # dark_spot miss). Expand around the blob centre, keeping it on-image.
+    floor = 0.028
+    cxn = (mx0 + (mx1 - mx0) / 2.0) / W
+    cyn = (my0 + (my1 - my0) / 2.0) / H
+    bw, bh = max(bw, floor), max(bh, floor)
+    nx = min(max(0.0, cxn - bw / 2.0), 1.0 - bw)
+    ny = min(max(0.0, cyn - bh / 2.0), 1.0 - bh)
+    return [nx, ny, bw, bh]
 
 
 def _part_mask_full(base, W, H):
@@ -845,14 +869,19 @@ def _sanitize_region_defects(defects, part_mask, base, W, H):
                         changed = True
                         continue
             if str(d.get("category", "")).lower() in _DARK_CATEGORIES:
-                if not _has_dark_content(base, bb, part_ref, W, H):
+                cat = str(d.get("category", "")).lower()
+                if not _has_dark_content(base, bb, part_ref, W, H, cat):
                     changed = True
                     continue
-                tight = _tighten_dark_bbox(base, bb, part_ref, W, H)
-                if [round(v, 6) for v in tight] != [round(float(v), 6) for v in bb]:
-                    d = dict(d)
-                    d["bbox"] = tight
-                    changed = True
+                # dark_mark is a tight near-black blotch -> hug the dark pixels.
+                # dark_spot is a soft-edged smudge -> keep the full reported footprint
+                # (shrinking to the darkest core gives a tiny box unlike the operator mark).
+                if cat == "dark_mark":
+                    tight = _tighten_dark_bbox(base, bb, part_ref, W, H, category=cat)
+                    if [round(v, 6) for v in tight] != [round(float(v), 6) for v in bb]:
+                        d = dict(d)
+                        d["bbox"] = tight
+                        changed = True
         on_part.append(d)
     # 3. merge same-category near boxes
     merged = _merge_same_category(on_part)

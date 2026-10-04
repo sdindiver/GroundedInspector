@@ -2,6 +2,30 @@
   "description": "GROUNDING GATE - consumed ONLY by tools/check_grounding.py; NEVER sent to the Anthropic API (it is not part of the rendered prompt bundle). Each entry names a grounding concept that MUST survive into the rendered bundle so a future API run reproduces the same behavior. This catches the one failure a forward config->prompt check cannot: a concept deleted from config entirely, or only ever written into an agent-only doc (SKILL.md). TWO KINDS OF PIN: (1) REFERENCE-BASED - `source` points at the config field that OWNS the rule; the gate asserts that field exists (catches deletion) and its text reaches the rendered bundle. No rule text is copied here, so the SINGLE SOURCE OF TRUTH stays in defects.json / parts/*.json and cannot drift out of sync with a copied phrase. (2) LITERAL - `must_contain` phrase, used ONLY for grounding that lives in freeform prose with no field path (system_prompt.md universals, and part rulings/notes arrays). When you harden grounding, prefer a `source` reference; fall back to `must_contain` only for freeform prose.",
   "required": [
     {
+      "id": "universal.zone_sweep_surface_defects",
+      "why": "Generalizes the gestalt-skip fix to the WHOLE position-agnostic surface-blemish family (line_mark, dark_spot, dark_mark, white_mark, dent, edge_chip, corrosion) on EVERY part, not just dark on the bracket. Forces a per-ZONE enumerated sweep (face, every edge/rim, every hole border) so OK cannot be returned by a whole-part glance. Roots out the 164818 miss (a faint top-edge dark_spot skipped because the part looked clean). Universal system_prompt prose - pinned by phrase so it reaches both prompts.",
+      "must_contain": [
+        "ZONE SWEEP FOR SURFACE DEFECTS",
+        "OK is invalid unless every zone is explicitly cleared"
+      ]
+    },
+    {
+      "id": "bracket.surface_sweep_zones",
+      "why": "Supplies the bracket's part-specific zone list (open face, top edge, bottom edge, each end, each of the 3 hole borders) for the universal ZONE SWEEP, clearing the whole surface-blemish family per zone - not a dark-only check. Pinned so the zone list reaches both prompts and can never be dropped.",
+      "must_contain": [
+        "SURFACE SWEEP ZONES",
+        "may NOT be returned OK unless this surface_sweep lists ALL of the above zones EXPLICITLY CLEARED"
+      ]
+    },
+    {
+      "id": "universal.grid_reference_localization",
+      "why": "LLM bbox coordinates are perceptual ESTIMATES, imprecise at the exact edge (a left edge read as 0.40 when the defect starts at 0.47). A labeled coordinate-grid copy of the input is attached (inspect._bundle_images via grid.grid_for) and the engine must READ each bbox edge off the nearest gridline instead of guessing a fraction. Pinned so the grid-reading rule reaches the future API and can never be dropped. Freeform system_prompt.md prose - pinned by phrase.",
+      "must_contain": [
+        "READ COORDINATES OFF THE GRID",
+        "take the NUMBERS from the grid copy"
+      ]
+    },
+    {
       "id": "universal.positive_checkpoint_clearance",
       "why": "The systematic miss: embossing_missing (an ABSENCE defect gated behind face classification) was silently skipped and the part defaulted to OK because nothing loud appeared. This forcing function makes OK impossible without a positive per-checkpoint clearance, and requires the prerequisite observation to run first. Must reach every part's prompt (and the future Anthropic API) so a silent skip cannot recur. Freeform system_prompt.md prose - pinned by phrase.",
       "must_contain": [
@@ -50,6 +74,11 @@
       "source": { "part": "bracket", "defect": "serration_missing", "field": "localization" }
     },
     {
+      "id": "serration_missing.pattern_match_protocol",
+      "why": "The recurring false positive (image 164209): a COUNTERSUNK/DISHED/DOMED serrated hole shows a smooth-looking bore and was flagged serration_missing at high confidence, when its RIM actually shows scallops (serration PRESENT). This directed two-pattern match (serrated scalloped rim vs plain smooth rim) forces the decision onto the RIM only and carries the countersink/dome guard, so a domed bore is never read as missing. Pinned so it reaches the future API and can never be dropped.",
+      "source": { "part": "bracket", "defect": "serration_missing", "field": "pattern_match_protocol" }
+    },
+    {
       "id": "incomplete_embossing.localization",
       "why": "The VA emboss zone is located by part geometry (between the middle hole and the plain end-hole, opposite the serrated hole); the box must be small and there, drawn box-only.",
       "source": { "part": "bracket", "defect": "incomplete_embossing", "field": "localization" }
@@ -91,6 +120,41 @@
       "id": "dark_spot.actionability_gate",
       "why": "A few isolated dark pixels without a visible surrounding footprint are not actionable dark spots. Keep them below the 0.60 confidence gate; annotate only a coherent defect-sized area and box its full visible footprint.",
       "source": { "defect": "dark_spot", "field": "actionability_rule" }
+    },
+    {
+      "id": "dark_spot.pattern_match_protocol",
+      "why": "Day-to-day recall of faint edge/scatter dark spots was unstable because inspection was open-ended ('find the defects'). This directed protocol anchors dark_spot on the attached pattern crops and forces a zone-by-zone 'does any region match this pattern?' sweep (face + both edges + rim), listing EVERY match. Pilot for the pattern-matching approach; pinned so the protocol reaches the future API and can never be dropped.",
+      "source": { "defect": "dark_spot", "field": "pattern_match_protocol" }
+    },
+    {
+      "id": "corrosion.pattern_match_protocol",
+      "why": "Directed anatomy-agnostic pattern match rolled out to every global defect (stability over open-ended inspection). Anchors corrosion on its pattern and forces a zone-by-zone match sweep, listing every region that matches. Pinned so it reaches the future API and can never be dropped.",
+      "source": { "defect": "corrosion", "field": "pattern_match_protocol" }
+    },
+    {
+      "id": "line_mark.pattern_match_protocol",
+      "why": "Directed anatomy-agnostic pattern match for line_mark: zoom region-by-region and list every groove that matches the line pattern, so a faint groove is not skipped. Pinned so it reaches the future API and can never be dropped.",
+      "source": { "defect": "line_mark", "field": "pattern_match_protocol" }
+    },
+    {
+      "id": "dent.pattern_match_protocol",
+      "why": "Directed anatomy-agnostic pattern match for dent: trace the whole contour and list every broken-contour+depression region that matches the dent pattern. Pinned so it reaches the future API and can never be dropped.",
+      "source": { "defect": "dent", "field": "pattern_match_protocol" }
+    },
+    {
+      "id": "edge_chip.pattern_match_protocol",
+      "why": "Directed anatomy-agnostic pattern match for edge_chip: trace the entire silhouette and list every missing-material break that matches the chip pattern. Pinned so it reaches the future API and can never be dropped.",
+      "source": { "defect": "edge_chip", "field": "pattern_match_protocol" }
+    },
+    {
+      "id": "dark_mark.pattern_match_protocol",
+      "why": "Directed anatomy-agnostic pattern match for dark_mark: zone-by-zone, list every near-black connected blotch that matches the pattern (and keep a scatter of separated specks as dark_spots). Pinned so it reaches the future API and can never be dropped.",
+      "source": { "defect": "dark_mark", "field": "pattern_match_protocol" }
+    },
+    {
+      "id": "white_mark.pattern_match_protocol",
+      "why": "Directed anatomy-agnostic pattern match for white_mark: zone-by-zone, list every localised dull low-luster patch that matches the pattern (not glare, not uniform tint). Pinned so it reaches the future API and can never be dropped.",
+      "source": { "defect": "white_mark", "field": "pattern_match_protocol" }
     },
     {
       "id": "white_mark.actionability",

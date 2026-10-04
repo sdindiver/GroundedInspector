@@ -167,6 +167,69 @@ see the answer key. To make dev representative, inspect the SAME way:
 | pin a rule so it can never be silently dropped | add a `source`-referenced entry (freeform prose: `must_contain`) to `grounding/required_grounding.json` | guard |
 | operator answer key (API never sees it) | `development/docs/grounding/<part>_ground_truth.md` | no |
 
+## 🧭 DIRECTED PATTERN-MATCH PROTOCOL — the stable inspection method (every global defect)
+The stable alternative to open-ended "find the defects" (which made faint-defect recall vary
+session to session): each GLOBAL defect in `grounding/defects.json` carries a
+`pattern_match_protocol` field, and inspection RUNS IT every time for that defect. The model
+(Claude / the Vision API) is the matcher — there is NO detection code (INVARIANT 0c still holds).
+- **Treat the defect's PATTERN as the template** = its `signature` + the attached
+  `grounding/references/global/<defect>/` crops. Ask "does any region match this pattern?",
+  not "is anything wrong?".
+- **ANATOMY-AGNOSTIC zones (works on ANY part shape — strap, cup, future parts).** Sweep zones
+  defined by THIS part's own anatomy, never a fixed shape: (a) the open face / wall, (b) EVERY
+  outer edge / the rim all the way around, (c) the border of EVERY hole / feature. The pattern's
+  APPEARANCE is part-independent; match on the defect, not the part shape. NEVER hard-code
+  part-specific anatomy (e.g. "both long edges", "the strap edge") into a global defect — keep
+  that wording in the part file, not in `defects.json`.
+- **LIST EVERY region that matches**, one tight bbox per match (enumerate; a zone is only
+  CLEARED after active comparison). Keep each defect's REJECT list (its known false positives).
+- **Pinned**: every all-scope protocol has a `source` pin in `grounding/required_grounding.json`
+  (`field: pattern_match_protocol`) so it reaches the API and can never be silently dropped.
+  (opt-in defects like `logo_missing` carry the field but are not pinned — they don't reach a
+  prompt unless a part opts in, which would fail the reach-both-prompts gate.)
+- **To extend / strengthen**: add or edit the `pattern_match_protocol` on the defect, and drop more
+  pattern crops into `grounding/references/global/<defect>/` (full image + `_crop.png` + a
+  one-line `.txt` caption). The crop library is the durable "memory"; add exemplars from new
+  part types as they appear so the pattern generalizes.
+
+## 🔁 STABILIZING GROUNDING — the combined loop (how we kill session-to-session drift)
+Agreed working method for making verdicts reproducible. Core principle: **words shrink, crops
+grow.** Prose rules have IRREDUCIBLE residual ambiguity — every tightening adds new fuzzy terms
+("clearly", "~1.5×", "unreadable"), so you can never word your way to zero. Fix ambiguity with a
+VISUAL exemplar crop, not another paragraph.
+1. **DISCOVER divergence** (two complementary tools; a static read alone is NOT enough — it only
+   finds ambiguities you can imagine, and you are one reader with blind spots):
+   - **Static audit** — for each target region enumerate every reading the current wording legally
+     permits (competing/visually-similar regions, wrong-region wording, missing spatial/size-
+     ratio/landmark constraints, defect-transfer risks). Deterministic, free, but foreseen-only.
+   - **Empirical multi-run** — genuine fresh contexts surface the UNFORESEEN readings. Sources:
+     the user pasting the fixed probe into N new chats; the **Copilot CLI** looped
+     (`copilot -p "..." --allow-all-tools --add-dir <imgdir> --model <opus-id>`, must pin the
+     same model); or **augmentation** (rotate/flip/brightness a part and re-inspect — this is a
+     solo-runnable probe: if the anchor/defect/location call FLIPS across orientations, that is
+     ambiguity). NEVER fake independent runs from one contaminated context.
+2. **CLASSIFY each disagreement**: (1) grounding/rule ambiguity, (2) physical-region ambiguity,
+   (3) defect-definition ambiguity, or (4) session/context/model variability. Only 1-3 are fixable
+   in the bundle; (4) is agent nondeterminism and only the temp=0 engine removes it.
+3. **FIX with a crop, not prose**: add a tight localization crop (+ one-line caption that may encode
+   a SAME-IMAGE contrast test, e.g. judge VA depth vs the serrated scallops) via
+   `tools/make_exemplar_crop`. Do NOT add a crop that is misleading — if the defect is too faint to
+   crop clearly (e.g. a shallow VA that reads as blank metal), keep a locator CAPTION and skip the
+   crop (the gate's "leave it if too faint" policy). Keep grounding LOGIC unchanged; never redefine
+   a defect just to force runs to agree.
+4. **VALIDATE** against the frozen answer key (`development/docs/grounding/<part>_ground_truth.md`,
+   all images) and `python -m tools.check_grounding` → PASSED. No change ships if it regresses any
+   image. When available, the **temp=0 engine** (`python -m grounded_inspector.inspect`) is the real
+   reproducibility gate — same bundle + image → identical verdict, which the chat agent cannot
+   guarantee.
+5. **REPORT honestly** — never declare "stable" because N runs agreed; always state the ambiguities
+   the runs did NOT exercise, and flag genuinely under-determined cases (e.g. a matte, VA-less,
+   equal-hole bracket where WHICH hole is the serrated anchor is not decidable from the image — a
+   part-design/imaging limit no rule or crop fixes).
+
+The specialized agent `.github/agents/grounding-stabilizer.agent.md` encodes this loop; use it for
+grounding-stability work, the `inspector` agent for routine inspection.
+
 ## PRE-FLIGHT — after any bundle/renderer change
 1. `python -m tools.check_grounding` → must print **PASSED**.
 2. Inspect **BLIND & VISUAL** (INVARIANT 0c): no answer-key peeking, no code to find defects.

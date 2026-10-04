@@ -11,6 +11,14 @@
       ],
       "scope": "all",
       "signature": "Brown/orange/red mottled rust or oxidation staining on any surface, wall, face or edge. Distinguish from plating tint or shadow - true corrosion has a rough, blotchy texture and warm colour.",
+      "pattern_match_protocol": [
+        "DIRECTED PATTERN MATCH (run this EVERY time for corrosion).",
+        "The corrosion pattern is the SAME on ANY part - brown/orange/red mottled, rough-textured OXIDATION STAINING on otherwise INTACT metal - so match on that appearance, not the part shape (use the attached corrosion reference crops if any are present).",
+        "Sweep the WHOLE part in zones defined by THIS part's own anatomy: (a) the open face / wall, (b) EVERY outer edge / the rim all the way around, (c) the border of EVERY hole or feature - and for EACH zone ask explicitly: 'does any region here match the corrosion pattern?'",
+        "LIST EVERY region that matches the pattern, one tight bbox per affected patch.",
+        "Match acceptance: include a warm, rough, blotchy stain on intact metal; REJECT the uniform plating/passivation tint, a plain shadow, and a reddish scuff on a BROKEN/sheared edge where material is missing (that is edge_chip, not corrosion).",
+        "A zone is only CLEARED after you have actively compared it to the pattern and found no match."
+      ],
       "disambiguation": [
         "DECISIVE TEST vs edge_chip at a rim/edge: corrosion is reddish/brown/orange mottled OXIDATION STAINING on INTACT metal - the surface/contour is unbroken, no material is missing.",
         "If the reddish colour sits ON A SHEARED, CHIPPED or NOTCHED rim/edge where MATERIAL IS MISSING or torn (a break in the smooth edge outline), that is an EDGE_CHIP (the reddish is just contact/scuff staining on the chip), NOT corrosion.",
@@ -27,6 +35,14 @@
       ],
       "scope": "all",
       "signature": "A thin, continuous linear trace running across the surface where the finish has been rubbed or gouged away, often spanning a large fraction of the part length and crossing over holes or markings WITHOUT breaking. It may catch the light as a bright hairline OR read as a relatively FAINT continuous line - do NOT assume the defect is the brightest streak on the part. On a brushed/plated finish it is distinguished from the normal directional grain by being a SINGLE, more-defined, continuous groove that holds ONE unbroken path over a large fraction of the part (often running hole-to-hole), whereas grain and polishing streaks are many short, shallow, look-alike parallel lines (see FINISH GRAIN RULE). Continuity and singularity matter more than orientation or brightness. A DARK or near-black mark is NOT a line_mark even if elongated - that is a dark_spot / dark_mark.",
+      "pattern_match_protocol": [
+        "DIRECTED PATTERN MATCH (run this EVERY time for line_mark).",
+        "The line_mark pattern is the SAME on ANY part - a SINGLE thin, continuous, depth-less bright / bare-metal groove that holds one unbroken path over a large fraction of the part (often crossing holes) - so match on that appearance, not the part shape (use the attached line_mark reference crops if present).",
+        "Sweep the WHOLE part in overlapping REGIONS defined by THIS part's own anatomy - the open face / wall, the zones near EVERY edge, and around EVERY hole / feature - and for EACH region mentally ZOOM in and ask explicitly: 'does any continuous groove here match the line_mark pattern?'",
+        "LIST EVERY groove that matches the pattern, one tight bbox per distinct groove (if 4 are visible, emit 4) - COUNT first, then box each, including faint ones.",
+        "Match acceptance: include a thin continuous groove even when FAINT; REJECT the brushed-grain field, the brightest specular reflection band, rim glare along the silhouette, any DARK/near-black mark (that is dark_spot/dark_mark), and a localised glint on a deformed edge (that is a dent).",
+        "A region is only CLEARED after you have zoomed and actively compared it to the pattern and found no match."
+      ],
       "finish_grain_rule": [
         "DECISIVE TEST vs the normal BRUSHED-FINISH GRAIN: a brushed or plated metal surface is naturally covered in many fine, roughly PARALLEL directional grain lines and shallow polishing micro-scratches - these are the FINISH, not defects.",
         "Do NOT pick the single brightest hairline just because it is shiny; on a brushed finish the brightest hairlines are usually grain/polish, and the genuine line_mark may run at a SIMILAR angle to the grain, so angle alone does NOT separate them.",
@@ -111,6 +127,14 @@
       ],
       "scope": "all",
       "signature": "Metal pushed in or deformed but intact - no missing material. Any localised edge, rim, collar, flange or face deformation that breaks the smooth expected contour.",
+      "pattern_match_protocol": [
+        "DIRECTED PATTERN MATCH (run this EVERY time for dent).",
+        "The dent pattern is the SAME on ANY part - a localised 3D DEFORMATION that breaks the smooth contour, with a SHORT rounded bright glint paired with an adjacent SHADOWED depression - so match on that appearance, not the part shape (use the attached dent reference crops if any are present).",
+        "Trace the WHOLE contour and surface defined by THIS part's own anatomy: EVERY outer edge, rim, flange and collar all the way around, plus the open face / wall - and for EACH zone ask explicitly: 'does any region here match the dent pattern (broken contour + depression)?'",
+        "LIST EVERY region that matches the pattern, one tight bbox per dent.",
+        "Match acceptance: include a localised broken-contour deformation with a depression; REJECT a flat thin continuous bright streak with no depth (that is line_mark) and plain specular glare on an intact contour.",
+        "A zone is only CLEARED after you have actively compared it to the pattern and found no match."
+      ],
       "disambiguation": [
         "DECISIVE TEST vs line_mark: a dent is a 3D DEFORMATION (metal pushed in, contour broken) - its edge may catch light as a bright glint, but it is SHORT, ROUNDED, LOCALISED and paired with an adjacent SHADOWED depression.",
         "A line_mark is a FLAT, thin, continuous, depth-less bright streak with no shadow trough.",
@@ -127,6 +151,14 @@
       ],
       "scope": "all",
       "signature": "A clean cut, sheared notch or chipped-away section on an outer edge/flange where material is MISSING - a straight or angular break in an otherwise smooth silhouette. Missing material distinguishes this from a dent.",
+      "pattern_match_protocol": [
+        "DIRECTED PATTERN MATCH (run this EVERY time for edge_chip).",
+        "The edge_chip pattern is the SAME on ANY part - a notch / sheared break in the outer SILHOUETTE where MATERIAL IS MISSING (a straight or angular gap in an otherwise smooth outline) - so match on that appearance, not the part shape (use the attached edge_chip reference crops if any are present).",
+        "Trace the ENTIRE outer silhouette defined by THIS part's own anatomy - every outer edge, the rim, and every flange - all the way around, and for EACH stretch ask explicitly: 'does the outline here match the edge_chip pattern (a break where material is gone)?'",
+        "LIST EVERY break that matches the pattern, one tight bbox per chip, centred on the missing-material notch.",
+        "Match acceptance: include only a genuine break in the outline with material MISSING; REJECT a reddish stain on an INTACT edge (that is corrosion) and a pushed-in but intact deformation (that is a dent).",
+        "A stretch of edge is only CLEARED after you have actively compared it to the pattern and found no match."
+      ],
       "localization": [
         "BBOX MUST tightly enclose ONLY the actual chipped/sheared notch on the edge (the spot where material is missing, plus a thin margin) - NOT the whole rim arc and NOT a generic corner of the part frame.",
         "Localize to the exact break in the silhouette: include any bright torn/rough metal AND any reddish contact/scuff marks that mark the damaged patch, and make sure the box is CENTRED on them (do not let it drift to one side and clip part of the damage).",
@@ -144,6 +176,14 @@
       ],
       "scope": "all",
       "signature": "A larger or elongated irregular ABSOLUTE-DARK (near-black) blemish, smudge, streak-like blotch or clustered contamination with defined but non-geometric boundaries - a genuinely dark, near-black area, not merely a dull or tinted area. Use dark_mark when the dark material forms a connected patch/cluster or elongated smear larger than an isolated speck; there may be ONE or MULTIPLE such areas, and each gets its own box.",
+      "pattern_match_protocol": [
+        "DIRECTED PATTERN MATCH (run this EVERY time for dark_mark).",
+        "The dark_mark pattern is the SAME on ANY part - a SINGLE near-black CONNECTED blotch or elongated smear (its dark pixels TOUCH into one solid area) - so match on that appearance, not the part shape (use the attached dark_mark reference crops if present).",
+        "Sweep the WHOLE part in zones defined by THIS part's own anatomy: (a) the open face / wall, (b) EVERY outer edge / the rim all the way around, (c) the border of EVERY hole or feature - and for EACH zone ask explicitly: 'does any region here match the dark_mark pattern?'",
+        "LIST EVERY region that matches the pattern, one tight bbox per connected blotch.",
+        "Match acceptance: include only a genuinely near-black CONNECTED blotch/smear; REJECT the rainbow passivation tint, a plain shadow, and a LOOSE SCATTER of separated specks (that is MULTIPLE dark_spots, not one dark_mark).",
+        "A zone is only CLEARED after you have actively compared it to the pattern and found no match."
+      ],
       "false_positive_rule": [
         "Mark ONLY genuinely ABSOLUTE-DARK (near-black) areas.",
         "The rainbow / passivation plating TINT (purple / pink / green / gold iridescence) is the FINISH, NOT a dark_mark - NEVER mark the tint even though it is coloured.",
@@ -157,8 +197,9 @@
         "The marker segments the actual dark pixels inside this bbox, so keep the box tight on the darkened area."
       ],
       "classification_rule": [
-        "CLASSIFY BY CONNECTED AREA AND SHAPE: a connected elongated smear, irregular patch, or cluster of touching dark pixels is dark_mark even when narrow; reserve dark_spot for separate small isolated specks.",
-        "Do not split one connected dark mark into several dark_spot boxes."
+        "CLASSIFY BY WHETHER THE DARK PIXELS MERGE INTO ONE SOLID BLOTCH: dark_mark is ONLY a SINGLE near-black area whose dark pixels actually TOUCH and merge into one connected solid blotch or elongated smear.",
+        "A LOOSE SCATTER of small darker specks with VISIBLE CLEAN METAL BETWEEN them is NOT a dark_mark - even when the specks sit close together or read as one hazy mottled patch - that is MULTIPLE dark_spots: box each discrete speck separately (see dark_spot).",
+        "Do not split one genuinely connected solid blotch into several dark_spot boxes, and do not merge a scatter of separated specks into one dark_mark box."
       ],
       "confidence_model": {
         "method": "weighted_evidence",
@@ -188,10 +229,20 @@
         190
       ],
       "scope": "all",
-      "signature": "Small, DISCRETE, separated, roughly rounded dark specks on the surface, clearly darker than the surrounding finish but smaller and less connected than a dark_mark. A part OFTEN has SEVERAL (commonly 2 or more), and they frequently sit near or ON the strap EDGES as well as on the open face - not only in the centre. Do not use dark_spot for one connected elongated smear, irregular patch, or touching cluster; those are dark_mark.",
+      "signature": "Small, DISCRETE, separated, roughly rounded dark specks on the surface, clearly darker than the surrounding finish but smaller and less connected than a dark_mark. A part OFTEN has SEVERAL (commonly 2 or more), and they frequently sit near or ON the part's EDGES / RIM as well as on the open face/wall - not only in the centre. Do not use dark_spot for one connected elongated smear, irregular patch, or touching cluster; those are dark_mark.",
+      "pattern_match_protocol": [
+        "DIRECTED PATTERN MATCH (run this EVERY time for dark_spot - do not inspect dark_spot open-endedly).",
+        "You are given dark_spot PATTERN exemplars (the attached dark_spot reference crops: an edge-hugging spot, a faint scatter of specks, and a small mottled patch). Treat those crops as the reference pattern of what a dark_spot looks like.",
+        "The dark_spot pattern is the SAME on ANY part - a discrete bounded speck darker than THAT part's own finish - so these exemplars apply even to a part shape not shown in them; match on the SPOT's appearance, never on the part shape.",
+        "Then sweep the WHOLE part in zones defined by THIS part's own anatomy (not a fixed part shape): (a) the open face / wall, (b) EVERY outer edge / silhouette boundary all the way around the part, (c) the rim and the border of EVERY hole or feature - and for EACH zone ask explicitly: 'does any region here match the dark_spot pattern?'",
+        "LIST EVERY region that matches the pattern (a discrete, bounded patch clearly darker than the surrounding finish), one tight bbox per match, including faint ones on the edges.",
+        "Match acceptance: include a candidate if it RESEMBLES the pattern crops - discrete, bounded, and darker than the finish - even when faint. Reject it only if it is NOT the pattern: passivation tint, a hole bore/shadow, specular glare, or diffuse boundaryless haze.",
+        "Do not stop at the first or most obvious spot; a zone is only CLEARED after you have actively compared it to the pattern and found no match."
+      ],
       "enumeration_rule": [
         "ENUMERATE EVERY DISTINCT dark spot - UNDER-COUNTING is the most common error.",
-        "Sweep the WHOLE face AND both long edges, COUNT each discrete spot, and emit ONE tight bbox PER spot (several dark_spot entries when several exist).",
+        "Sweep the WHOLE face/wall AND EVERY outer EDGE / the RIM explicitly: dark spots FREQUENTLY sit ON or hard against the part's edge, where they are faint and easy to dismiss as edge shadow - a faint but clearly-bounded dark smudge ON AN EDGE IS a dark_spot and MUST be boxed, never skipped as trivial.",
+        "COUNT each discrete spot, and emit ONE tight bbox PER spot (several dark_spot entries when several exist).",
         "Do NOT collapse multiple spots into one big box, and do NOT report only the single most obvious one."
       ],
       "false_positive_rule": [
@@ -201,6 +252,7 @@
       "actionability_rule": [
         "TINY-SPECK GATE: do not annotate an isolated one- or few-pixel dark dot when it has no clearly visible surrounding footprint or boundary.",
         "Treat that evidence as below 0.60 confidence and leave it unmarked.",
+        "The gate excludes ONLY sub-pixel noise with no footprint; a small spot that HAS a visible bounded footprint - INCLUDING one on an EDGE / the rim - is ACTIONABLE and must be boxed, never waved off as 'trivial'.",
         "Annotate only when the dark evidence forms a visibly coherent, defect-sized area with a boundary; the bbox should cover that full visible footprint, not individual dark pixels."
       ],
       "disambiguation": [
@@ -208,11 +260,11 @@
         "A dark_spot is any mark that is DARKER (near-black) than the surrounding finish.",
         "If the mark is dark or black, classify it as a dark_spot (or a dark_mark when it is a larger solid blotch) EVEN IF it is somewhat elongated or streaky - darkness wins over shape.",
         "A line_mark is reserved for BRIGHT / silver / shiny metallic scratches where bare metal is exposed; never label a dark or near-black mark as a line_mark.",
-        "Escalate to dark_mark when the dark area is a larger solid blotch rather than one or a few small dark spots."
+        "Escalate to dark_mark ONLY when the dark pixels MERGE into one larger SOLID near-black blotch; a scatter of separated small specks stays as MULTIPLE dark_spots, never one dark_mark."
       ],
       "classification_rule": [
-        "CLASSIFY BY CONNECTED AREA AND SHAPE AFTER THE COLOUR TEST: emit one dark_spot per separate small isolated speck with visible space around it.",
-        "If several dark pixels touch into an elongated smear, irregular patch, or connected cluster, emit one dark_mark for that connected area instead of splitting it into spots."
+        "CLASSIFY BY CONNECTED AREA AND SHAPE AFTER THE COLOUR TEST: emit one dark_spot per separate small speck that has visible clean metal around it - a loose scatter of separated specks is ALWAYS multiple dark_spots, even when they cluster close or read as one hazy mottled patch.",
+        "Only when the dark pixels actually TOUCH and merge into one solid near-black blotch do you emit a single dark_mark for that connected area instead of splitting it into spots."
       ],
       "localization": [
         "BBOX MUST enclose the FULL visible footprint of the dark spot or connected spot cluster, plus a small margin - not just one or two dark pixels and not the whole face.",
@@ -250,6 +302,14 @@
       ],
       "scope": "all",
       "signature": "A localised irregular PALE, dull, low-lustre patch where the underlying brushed/machining grain is still visible through it - a loss of shine/colour, NOT added dark debris. Distinguish from glare and from dark burns/speckling (which are darker than the surroundings).",
+      "pattern_match_protocol": [
+        "DIRECTED PATTERN MATCH (run this EVERY time for white_mark).",
+        "The white_mark pattern is the SAME on ANY part - a LOCALISED dull, pale, LOW-luster patch that is DULLER than the surrounding same-face metal with the brushed grain still visible through it - so match on that appearance, not the part shape (use the attached white_mark reference crops if present).",
+        "Sweep the WHOLE part in zones defined by THIS part's own anatomy: (a) the open face / wall, (b) EVERY outer edge / the rim all the way around, (c) the border of EVERY hole or feature - and for EACH zone ask explicitly: 'does any region here match the white_mark pattern?'",
+        "LIST EVERY region that matches the pattern, one tight bbox per dull patch.",
+        "Match acceptance: include a localised dull patch LESS reflective than its surroundings with grain visible through it; REJECT specular glare (BRIGHTER than surroundings, grain washed out) and the uniform overall passivation tint that covers the whole face.",
+        "A zone is only CLEARED after you have actively compared it to the pattern and found no match."
+      ],
       "disambiguation": [
         "DECISIVE TEST vs glare: a white_mark is LESS reflective than the metal around it (a dull, flat, matte patch - luster is LOST, and the brushed grain stays visible through it, and it does NOT move/shift with viewing angle).",
         "GLARE/specular highlight is MORE reflective than its surroundings (a bright mirror-like hotspot that washes out the grain and sits where light bounces off - typically a smooth gradient near an edge or high point).",
@@ -270,7 +330,15 @@
         200
       ],
       "scope": "opt_in",
-      "signature": "A required embossed, stamped or printed logo / part-marking is absent, incomplete or illegible where the golden reference shows it present. Only checked for parts that declare a logo (opt-in)."
+      "signature": "A required embossed, stamped or printed logo / part-marking is absent, incomplete or illegible where the golden reference shows it present. Only checked for parts that declare a logo (opt-in).",
+      "pattern_match_protocol": [
+        "DIRECTED PATTERN MATCH (run this EVERY time for logo_missing, for a part that declares a logo).",
+        "The pattern here is the REQUIRED logo/marking as shown in the golden reference - its presence, completeness and legibility - the same check on ANY part that carries a logo, so match on the marking's appearance, not the part shape.",
+        "Go to the logo's DESIGNATED location defined by THIS part's own anatomy and ask explicitly: 'is the required logo pattern present, complete and legible there?'",
+        "If the pattern is ABSENT, incomplete or illegible where the golden shows it present, flag logo_missing with one tight bbox on that designated zone; otherwise CLEAR it.",
+        "Match acceptance: judge the marking only at its designated spot; REJECT glare/shadow/dirt that merely obscures an otherwise-present logo (that is NEEDS_REVIEW, not missing) and never read a blank unmarked face as a logo zone unless the golden puts the logo there.",
+        "This checkpoint is only CLEARED after you have gone to the designated spot and confirmed the logo pattern is present."
+      ]
     }
   }
 }

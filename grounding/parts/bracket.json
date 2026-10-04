@@ -36,15 +36,27 @@
         200
       ],
       "signature": "The designated serrated hole appears as a smooth round bore instead of a repeating tooth/scallop profile. IDENTIFY THE SERRATED HOLE BY SIZE: it is the LARGEST of the three holes (the two plain holes are visibly smaller); the mark ALWAYS belongs on that biggest hole, never on a small plain hole or on blank metal. Compare it to the part's own smaller plain holes in the same image; if the largest hole looks identical to a plain hole (a smooth round bore, no teeth), serration is missing.",
+      "pattern_match_protocol": [
+        "DIRECTED PATTERN MATCH (run this EVERY time for serration_missing).",
+        "There are TWO rim patterns to match the designated hole against: the SERRATED pattern = a scalloped / cog-toothed RIM (a ring of small bumps around the outer edge), and the PLAIN pattern = a perfectly smooth circular RIM with no bumps. The golden reference shows the SERRATED pattern.",
+        "Step 1: find the designated serrated hole = the LARGEST of the three holes.",
+        "Step 2: look ONLY at its RIM / OUTER EDGE OUTLINE (never the bore fill) and ask: 'does this rim match the SERRATED (scalloped) pattern or the PLAIN (smooth) pattern?'",
+        "COUNTERSINK / DOME GUARD (the #1 false positive, and the exact past miss): a countersunk / dished / domed hole shows a SMOOTH-LOOKING BORE even when it IS serrated, because the dish + centre glare hide the teeth. A smooth-looking bore is NOT evidence of missing serration. If the RIM shows scallops, serration is PRESENT - CLEAR it, do NOT flag.",
+        "Only flag serration_missing when the RIM itself clearly matches the PLAIN smooth pattern (no scallops) AND the hole is confirmed the largest.",
+        "DECISIVE WHOLE-PART RULE (removes the matte/soft-focus wobble - this is the authoritative tie-breaker, follow it every time): a GOOD bracket ALWAYS shows a scalloped rim on its serrated hole, on BOTH faces (the back face shows the teeth too, ref 164359) and on bare-bright / matte / rainbow finishes alike. So SCAN ALL THREE rims: if NOT ONE hole anywhere on the part shows a scalloped rim (every rim reads as a smooth circle), the serration is genuinely MISSING - FLAG serration_missing CONFIDENTLY (>=0.70) on the LARGEST hole. Never return NEEDS_REVIEW for an all-rims-smooth part.",
+        "A matte / bare-metal / soft-focus photo, or a countersink DISH, is NOT by itself a reason for NEEDS_REVIEW: a dish hides the BORE, never the RIM scallops, and a serrated rim stays visible on a matte part. Drop to NEEDS_REVIEW ONLY when GLARE or an OBLIQUE ANGLE makes a SPECIFIC rim unreadable AND that same hole could still plausibly be serrated (its rim is ambiguous, not clearly smooth). Clearly-smooth-everywhere is serration_missing, never NEEDS_REVIEW."
+      ],
       "glare_rule": [
         "GLARE-ROBUST CHECK (critical for bare-bright/washed-out photos): teeth are decided by the hole's OUTER EDGE OUTLINE, not by the brightness of the bore.",
         "Even when the bore is blown out to solid white by glare, a serrated hole still shows a scalloped/cog-toothed EDGE (a ring of tiny bumps) around its rim, while a plain hole shows a perfectly smooth circular edge.",
         "Judge serration from the rim silhouette.",
+        "A COUNTERSUNK / DISHED / DOMED serrated hole shows a SMOOTH-LOOKING BORE even though it IS serrated - do NOT read the domed/dished bore as missing; the teeth live on the RIM. Judge the rim scallops ONLY, and if the rim shows scallops the serration is PRESENT.",
         "Only call serration_missing if the rim of the designated hole is clearly a smooth circle with NO scallops.",
         "If glare makes the rim genuinely unreadable, do NOT guess serration_missing - lower confidence / NEEDS_REVIEW instead."
       ],
       "localization": [
         "BBOX MUST tightly enclose ONLY the single serrated hole - the LARGEST-diameter hole of the three - its bore plus its rim, and nothing else.",
+        "IDENTIFY THE LARGEST HOLE BY ACTUAL DIAMETER (the recurring mistake was marking a SMALLER hole): compare the three holes' real outer diameters and mark the genuinely LARGEST one. A countersink DISH distorts apparent size in BOTH directions - do NOT let a smaller dished/countersunk hole be mistaken for the biggest, and do NOT skip the largest hole just because it is dished (the serrated hole CAN be dished). When one hole is clearly larger than the other two, that larger hole is the serrated one - put the mark there, never on a visibly smaller hole.",
         "Centre the box ON that biggest hole.",
         "Do NOT box the whole part, do NOT box a smaller plain hole, and do NOT place the box on blank metal beside a hole.",
         "The marker draws a locator circle inside this bbox, so a tight box centred exactly on the largest hole is required for the mark to land on it."
@@ -131,7 +143,7 @@
     [
       "MANDATORY CHECKPOINT LIST (gates OK - emit a `checkpoints` entry for EVERY item below on EVERY bracket image, before deciding the result). `OK` is INVALID unless ALL of these are explicitly CLEARED; run each one actively - do NOT wait for an anomaly to catch your eye, because a quiet defect (a missing mark, a single faint groove) looks like normal metal.",
       "The full list:",
-      "(1) face - classify FRONT vs BACK from the outer-edge/countersink profile (PREREQUISITE for embossing); (2) serration_missing - the LARGEST hole shows a scalloped/toothed rim; (3) embossing - face+VA per the MANDATORY EMBOSSING CHECKPOINT; (4) line_mark - SWEEP THE WHOLE FACE for thin continuous grooves, including a single faint hairline that runs hole-to-hole (this is the most-missed defect: a thin continuous groove is a line_mark even when it is faint, and a thin DEFINED continuous groove is NOT specular - specular is a broad grain-free gradient band, a line_mark is a narrow defined trace); (5) dark_mark / dark_spot - near-black blemishes (enumerate each, not the passivation tint); (6) white_mark - a localised dull low-luster patch; (7) global defects - corrosion, dent, edge_chip on the profile/edges.",
+      "(1) face - classify FRONT vs BACK from the outer-edge/countersink profile (PREREQUISITE for embossing); (2) serration_missing - the LARGEST hole shows a scalloped/toothed rim; (3) embossing - face+VA per the MANDATORY EMBOSSING CHECKPOINT; (4) line_mark - SWEEP THE WHOLE FACE for thin continuous grooves, including a single faint hairline that runs hole-to-hole (this is the most-missed defect: a thin continuous groove is a line_mark even when it is faint, and a thin DEFINED continuous groove is NOT specular - specular is a broad grain-free gradient band, a line_mark is a narrow defined trace); (5) dark_mark / dark_spot - near-black blemishes (enumerate each, SWEEPING BOTH LONG EDGES / the RIM as well as the open face - edge-hugging spots are the most-missed, and a loose scatter of separated specks is MULTIPLE dark_spots not one dark_mark; not the passivation tint); (6) white_mark - a localised dull low-luster patch; (7) global defects - corrosion, dent, edge_chip on the profile/edges. Items (4)-(7) are the position-agnostic surface-blemish family and MUST be executed via the SURFACE SWEEP ZONES checkpoint (the universal ZONE SWEEP FOR SURFACE DEFECTS) - cleared per ZONE (every edge and hole border), not by a whole-part glance.",
       "Each item is CLEARED, DEFECT (then also in `defects`), or NEEDS_REVIEW; any unresolved item makes the overall result NEEDS_REVIEW, never OK.",
       "Under-reporting a checkpoint you did not actively run is the same failure as a silent OK."
     ],
@@ -145,6 +157,13 @@
       "FRONT + blank VA -> embossing_missing (sev 4); FRONT + one character clearly shallower -> incomplete_embossing; FRONT + VA present -> embossing CLEARED; BACK + blank VA -> embossing CLEARED (normal back face).",
       "A bracket may NOT be returned OK until this face+VA checkpoint is explicitly CLEARED, and a blank VA zone may NEVER be defaulted to OK without first CONFIRMING the BACK (square, sharp) edge profile.",
       "Emit this as a `checkpoints` entry (check='embossing', with the face + VA evidence) on every image."
+    ],
+    [
+      "SURFACE SWEEP ZONES (the bracket's part-specific zone list for the universal ZONE SWEEP FOR SURFACE DEFECTS; gates OK). Run the universal zone sweep across these bracket zones on EVERY image, clearing the WHOLE surface-blemish family - line_mark, dark_spot, dark_mark, white_mark, dent, edge_chip, corrosion - in each zone, not just one defect type.",
+      "ZONES (sweep, zoom, and name EACH in a `checkpoints` entry check='surface_sweep'): (a) the open face / wall; (b) the TOP long edge; (c) the BOTTOM long edge; (d) EACH rounded END; (e) the border of EACH of the 3 holes.",
+      "Edge-hugging blemishes on a rainbow/bright face disguise as 'passivation tint' or 'edge shadow' - a clean-LOOKING part gets the SAME full sweep; NEVER lower scrutiny because serration and embossing already cleared (exactly how a faint top-edge dark_spot was missed on an otherwise-OK bracket).",
+      "For every zone record cleared | <defect>; emit one tight bbox per blemish found (edge-hugging ones included); a loose scatter of separated specks is MULTIPLE dark_spots not one dark_mark, and the uniform rainbow tint is NOT a defect.",
+      "A bracket may NOT be returned OK unless this surface_sweep lists ALL of the above zones EXPLICITLY CLEARED; any un-swept zone makes the result NEEDS_REVIEW, never OK."
     ],
     "Identify the SERRATED hole first as the fixed anatomical anchor before checking anything else. Locate all other features relative to it, never relative to the image frame.",
     { "$ref": "glare_bright_finish_discipline" },

@@ -10,6 +10,13 @@ defects that appear in the catalog below. You never invent categories.
 3. Examine the INPUT image. Scan the ENTIRE part, not just the centre. Check every listed defect.
 4. For each defect you find, output a tight normalized bbox [x, y, w, h] (0..1) on the actual
    defect - not the whole part, not the whole rim.
+   - READ COORDINATES OFF THE GRID. A copy of the INPUT with a labeled coordinate grid is
+     attached (magenta lines every 0.10, cyan every 0.05; the numbers along the TOP are x,
+     down the LEFT are y). Do NOT estimate a fraction from memory - ALIGN each edge of the
+     defect to the NEAREST gridline on that grid and read it off: x,y = the top-left corner's
+     gridline reading, w = (right gridline - left gridline), h = (bottom - top). Judge the
+     defect on the CLEAN input; take the NUMBERS from the grid copy. This stops a box being
+     placed ~0.05-0.10 too far off (e.g. a left edge read as 0.40 when the defect starts at 0.47).
    - LINE-SHAPED defects (any catalog entry whose annotation.shape is "line", e.g. line_mark):
      ALSO output the actual line geometry. Add one [x1,y1,x2,y2] normalized (0..1, whole-image)
      segment PER visible scratch to a "lines" array, tracing each end-to-end, and set "line" to
@@ -73,6 +80,18 @@ defects that appear in the catalog below. You never invent categories.
   prerequisite observation FIRST, or the whole branch is silently skipped. A part is `OK` ONLY
   when every catalog checkpoint is explicitly CLEARED; if any checkpoint (or its prerequisite)
   cannot be resolved from the image, that checkpoint is `NEEDS_REVIEW`, never `OK`.
+- ZONE SWEEP FOR SURFACE DEFECTS (forces the look, not a gestalt glance; applies to EVERY part).
+  The position-agnostic surface-blemish family - line_mark, dark_spot, dark_mark, white_mark,
+  dent, edge_chip, corrosion - does not announce itself and is most often missed where it hugs an
+  EDGE or a hole border on a busy/tinted finish, ESPECIALLY on a part that otherwise looks clean.
+  Do NOT clear these with one whole-part glance. Sweep the part in ZONES defined by its OWN anatomy
+  - (a) the open face/wall, (b) EVERY outer edge/rim all the way around, (c) the border of EVERY
+  hole/feature - and for EACH zone actively compare it against each of those defect patterns,
+  ZOOMING into the zone (a faint edge blemish is invisible at full-frame scale). A zone is CLEARED
+  only after that active per-zone comparison; emit the sweep as an enumerated `checkpoints` artifact
+  that NAMES each zone and its result. Never lower scrutiny on a part that looks defect-free, and
+  never let serration/embossing/feature checks already clearing stand in for this surface sweep.
+  OK is invalid unless every zone is explicitly cleared; an un-swept zone is NEEDS_REVIEW, never OK.
 - EVERY BBOX MUST BE VALID - ON THE PART, ACTIONABLE, AND PLACED BY LOOKING. A defect bbox is a
   claim about pixels you actually saw, never a guessed coordinate. Each bbox MUST (a) sit ON the
   part silhouette - a box on the background/paper, off the part edge, or on empty space is NEVER a

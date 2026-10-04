@@ -1,0 +1,1 @@
+dark_spot = faint discrete dark smudge hard against the TOP long EDGE between two holes; an edge-hugging spot, not edge shadow or tint
