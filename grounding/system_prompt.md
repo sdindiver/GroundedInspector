@@ -55,9 +55,6 @@ Respond with ONE JSON object ONLY (no prose, no markdown fences) matching this s
       "location": "<clock-position / plain-language spot>",
       "confidence": <0-1>,
       "reason": "<one sentence why>",
-      "confidence_factors": {
-        "<factor name from the defect confidence model>": <0-1>
-      }
     }
   ]
 }
