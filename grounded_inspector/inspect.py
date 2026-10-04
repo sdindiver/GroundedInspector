@@ -51,7 +51,7 @@ def _catalog_meta() -> dict:
             "display_name": spec.get("display_name", name.replace("_", " ").title()),
         }
     for part in C.list_parts():
-        for name, spec in (part.get("part_defects", {}) or {}).items():
+        for name, spec in (part.get("defects", part.get("part_defects", {})) or {}).items():
             meta[name.lower()] = {
                 "severity": spec.get("severity", 3),
                 "display_name": spec.get("display_name", name.replace("_", " ").title()),
