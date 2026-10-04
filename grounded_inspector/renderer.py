@@ -579,7 +579,34 @@ def _has_dark_content(base, bbox, part_ref, W, H, category=None):
     roi = base[y0:y1, x0:x1]
     gray = cv2.cvtColor(roi, cv2.COLOR_RGB2GRAY)
     dark_abs = _dark_abs(part_ref, category)
-    return float((gray < dark_abs).mean()) >= _DARK_MIN_CONTENT
+    mask = (gray < dark_abs).astype(np.uint8)
+
+    # A dark_spot must contain a coherent, locally darker feature. Normal stamped
+    # texture, grain and illumination can easily put many individual pixels below
+    # the global threshold, so pixel fraction alone is not enough.
+    if str(category or "").lower() == "dark_spot":
+        n, _labels, stats, _centroids = cv2.connectedComponentsWithStats(mask, 8)
+        if n <= 1:
+            return False
+        areas = stats[1:, cv2.CC_STAT_AREA]
+        largest = int(np.max(areas))
+        if largest < max(8, int(0.003 * mask.size)):
+            return False
+
+        ys, xs = np.where(mask > 0)
+        if len(xs) < largest:
+            return False
+        core = gray[ys, xs]
+        # Compare the dark core against a one-pixel-expanded surrounding ring.
+        dilated = cv2.dilate(mask, np.ones((5, 5), np.uint8), iterations=1)
+        ring = (dilated > 0) & (mask == 0)
+        if not np.any(ring):
+            return False
+        local_contrast = float(np.median(gray[ring])) - float(np.median(core))
+        if local_contrast < 8.0:
+            return False
+
+    return float(mask.mean()) >= _DARK_MIN_CONTENT
 
 
 def _tighten_dark_bbox(base, bbox, part_ref, W, H, margin=0.006, category=None):
