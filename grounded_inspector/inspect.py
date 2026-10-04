@@ -75,9 +75,8 @@ def _normalize_defects(raw_defects, meta):
             "reason": d.get("reason", ""),
             "display_name": m["display_name"],
         }
-        for key in ("line", "lines", "location"):
-            if key in d:
-                item[key] = d[key]
+        if "location" in d:
+            item["location"] = d["location"]
         defects.append(item)
     return defects
 
