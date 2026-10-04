@@ -1,66 +1,15 @@
 {
-  "part": "Bearing Cup",
-  "aliases": [
-    "bearing_cup",
-    "bearing cup",
-    "cup"
-  ],
-  "description": "Deep-drawn metal bearing cup: outer flange (rolled edge), a stepped inner rim/collar, and a central bore. Photographed top-down (rim visible as a ring) or tilted (side view, rim foreshortened).",
-  "identity": {
-    "summary": "A round, deep-drawn metal CUP: circular outer flange/rolled edge, a stepped inner rim/collar, and a central bore. Roughly circular silhouette, not an elongated strap.",
-    "distinguishing_features": [
-      "round / circular silhouette (top-down) or shallow cylinder (tilted)",
-      "concentric rings: outer flange, inner rim/collar, central bore",
-      "cup-like depth (a drawn wall), not a flat thin plate",
-      "no in-line row of holes and no serrated hole"
-    ],
-    "not_to_confuse_with": [
-      "bracket (a flat elongated strap with 3 in-line holes and a serrated hole, NOT a round cup)"
-    ]
-  },
-  "golden_images": [
-    "grounding/references/parts/bearing_cup/golden"
-  ],
-  "global_defects": {
-    "exclude": [],
-    "include_opt_in": []
-  },
-  "part_defects": {
-    "missing_punch": {
-      "severity": 5,
-      "color": [
-        0,
-        0,
-        255
-      ],
-      "signature": "The central bore/hole is absent - the piercing/punching operation was missed, leaving a solid blind face where a through-hole should be. Critical, highest priority.",
-      "reference_dir": "grounding/references/parts/bearing_cup/defects/missing_punch"
-    },
-    "out_of_round": {
-      "severity": 4,
-      "color": [
-        0,
-        90,
-        255
-      ],
-      "signature": "Central bore is not a clean circle - one side pinched, dented inward or ovalised (out-of-round).",
-      "reference_dir": "grounding/references/parts/bearing_cup/defects/out_of_round",
-      "disambiguation": [
-        "ALWAYS assess bore roundness even on tilted/side-view cups.",
-        "Trace the bore opening: a good bore is a SMOOTH closed curve (a true circle head-on, a smooth ELLIPSE when tilted - perspective foreshortening alone is NOT a defect).",
-        "Flag out_of_round ONLY when the outline has a LOCALISED break in that smooth curve - one side flattened, pinched inward, or straightened so the arc is no longer smooth.",
-        "Distinguish from perspective: a tilted circle still curves smoothly everywhere; an out-of-round bore has a visible flat/kink on one segment.",
-        "Put a TIGHT bbox on the pinched/flattened segment, not the whole bore."
-      ]
-    }
-  },
-  "rulings": [
-    "Scan the ENTIRE part for EVERY applicable defect - outer edge, inner rim, both flanges and faces. Never stop at the first finding.",
-    "Capture MULTIPLE defects per image and rank them; mark the highest-severity one as PRIMARY.",
-    "Tilted / side-view cups whose inner rim is smooth and not clearly visible are OK - do NOT paint a speculative box; a false mark is worse than none.",
-    "For small rim/edge features use a TIGHT bbox on the actual defect, not the whole rim arc."
-  ],
-  "notes": [
-    "Missing/sheared material at the rim -> edge_chip. Metal pushed in but intact -> dent. Central hole not punched -> missing_punch. Rust/stain -> corrosion."
-  ]
+  "schema_version":2,
+  "part":"Bearing Cup",
+  "aliases":["bearing cup","cup","bearing"],
+  "description":"Round/cylindrical deep-drawn bearing cup with a rim and central bore.",
+  "identity":{"summary":"Round deep-drawn cup with a circular rim and central bore.","distinguishing_features":["round/cylindrical cup profile","continuous rim","central bore"],"not_to_confuse_with":["bracket"]},
+  "anatomy":{"bore":"central through-hole","rim":"continuous outer rim/flange"},
+  "inspection":["missing_punch","out_of_round","line_mark","dark_mark","dark_spot","white_mark","dent","edge_chip","corrosion"],
+  "include_defects":[],
+  "golden_images":["grounding/references/parts/bearing_cup/golden"],
+  "defects":{
+    "missing_punch":{"severity":5,"display_name":"Missing Punch","color":[0,0,255],"scope":"part","reference_dir":"grounding/references/parts/bearing_cup/defects/missing_punch","decision":{"check":"Inspect the central bore.","defect_when":"The expected central through-hole is absent and the center is solid/blind.","clear_when":"A genuine central through-hole is visibly present.","review_when":"Perspective, glare or occlusion prevents deciding whether the center is a through-hole.","ignore":["Dark bore interior when the hole opening is clearly present."],"localization":"Tight box around the central bore/expected punch location."}},
+    "out_of_round":{"severity":4,"display_name":"Out of Round","color":[0,90,255],"scope":"part","reference_dir":"grounding/references/parts/bearing_cup/defects/out_of_round","decision":{"check":"Trace the central bore opening and account for perspective before judging shape.","defect_when":"The bore contour is locally pinched, deformed or irregular beyond a smooth perspective ellipse.","clear_when":"The bore is a smooth circle head-on or a smooth perspective ellipse when tilted.","review_when":"The bore contour is too obscured to distinguish perspective from deformation.","ignore":["Perspective foreshortening alone.","Bore interior shading when the opening contour is intact."],"localization":"Tight box around the deformed portion of the central bore."}}
+  }
 }
