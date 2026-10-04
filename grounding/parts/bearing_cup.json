@@ -17,7 +17,6 @@
     "edge_chip",
     "corrosion"
   ],
-  "include_defects": [],
   "golden_images": [
     "grounding/references/parts/bearing_cup/golden"
   ],

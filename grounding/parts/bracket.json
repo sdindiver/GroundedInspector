@@ -33,7 +33,6 @@
     "edge_chip",
     "corrosion"
   ],
-  "include_defects": [],
   "golden_images": [
     "grounding/references/parts/bracket/golden"
   ],
