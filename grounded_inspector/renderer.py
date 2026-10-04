@@ -154,8 +154,7 @@ def _display_name(cat: str) -> str:
 def _confidence_pct(d) -> Optional[int]:
     """Normalize a verdict's confidence (fraction 0..1 or percent 0..100) to an
     int percent, or None if absent/unparseable. Shared by every label path so
-    the box/circle/line-fallback marks show the same confidence QMS's ML chip
-    already shows for line_mark."""
+    the rendered defect marks show the same confidence metadata as the verdict."""
     conf = d.get("confidence")
     if conf is None:
         return None
@@ -834,7 +833,7 @@ def _sanitize_region_defects(defects, part_mask, base, W, H):
             continue
         d.pop("_merged", None)
         final.append(d)
-    return lines + final, changed
+    return final, changed
 
 
 def render_annotated(image_path: str, verdict: dict, out_path: Optional[str] = None) -> str:
@@ -846,9 +845,7 @@ def render_annotated(image_path: str, verdict: dict, out_path: Optional[str] = N
     fscale = max(14, int(min(W, H) * 0.028))
     font = _font(fscale)
 
-    # Collect (instance, region-defects, line-defects). Region defects get the
-    # QMS segmentation + translucent fill + triple-stroke outline; line defects
-    # are drawn as scratch traces.
+    # Collect defect regions. Category-specific segmentation is applied during drawing.
     instances = verdict.get("instances")
     if isinstance(instances, list):
         order = {"DEFECT": 0, "NEEDS_REVIEW": 1, "OK": 2}
@@ -869,15 +866,15 @@ def render_annotated(image_path: str, verdict: dict, out_path: Optional[str] = N
     part_mask = _part_mask_full(base, W, H)
     cleaned = []
     for defs in groups:
-        had_boxes = any(not _is_line_defect(d) for d in defs)
+        had_boxes = bool(defs)
         kept, changed = _sanitize_region_defects(defs, part_mask, base, W, H)
-        if changed and had_boxes and not any(not _is_line_defect(d) for d in kept) \
+        if changed and had_boxes and not kept \
                 and result == "DEFECT":
             result = "NEEDS_REVIEW"
         cleaned.append(kept)
     groups = cleaned
     label_jobs = []  # (anchor, label, col, font)
-    # primary = highest-severity defect (region OR line) within each group
+    # primary = highest-severity defect within each group
     group_primary = [max(defs, key=lambda d: d.get("severity", 0), default=None)
                      for defs in groups]
     # per-instance tight part box (px): shrink a loose instance_bbox to the actual
@@ -915,8 +912,7 @@ def render_annotated(image_path: str, verdict: dict, out_path: Optional[str] = N
         overlay = arr.copy()
         for gi, defects in enumerate(groups):
             fnt, thick, _scale = group_style[gi]
-            region = [d for d in defects if not _is_line_defect(d)]
-            for d in region:
+            for d in defects:
                 job = _fill_and_outline(arr, overlay, d, W, H, colors,
                                         d is group_primary[gi], thick,
                                         multi_part=multi_part)
@@ -928,7 +924,7 @@ def render_annotated(image_path: str, verdict: dict, out_path: Optional[str] = N
 
     draw = ImageDraw.Draw(img)
 
-    # --- Phase 2: PIL labels, line traces, instance frames --------------------
+    # --- Phase 2: PIL labels and instance frames --------------------
     # Draw instance name chips FIRST and record their rects, so region/line defect
     # labels drawn afterwards can dodge them and never get painted over (the cup's
     # "Edge Chip" category label used to hide behind the "Bearing Cup" name chip).
