@@ -31,7 +31,6 @@ Every defect uses the same decision shape:
     {
       "severity": 3,
       "display_name": "Human name",
-      "scope": "all | part",
       "decision": {
         "check": "What to inspect.",
         "defect_when": "Evidence that confirms the defect.",
@@ -44,7 +43,7 @@ Every defect uses the same decision shape:
       }
     }
 
-`reference_dir` and `annotation` are optional only when the runtime actually needs them.
+`scope`, reference paths, and annotation shape are runtime metadata derived by the loader; do not author them in JSON.
 
 ## Ownership rules
 
