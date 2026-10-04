@@ -548,107 +548,6 @@ def _draw_instance_frame(draw, inst, box_px, W, H, font):
 _OFFPART_MIN_OVERLAP = 0.50   # a box overlapping the part silhouette by less than this is off-part
 _MERGE_GAP = 0.05             # normalized max gap between same-category boxes that collapse into one
 _MIN_ACTIONABLE_AREA = 0.0004  # normalized area; a lone box smaller than this is a non-actionable speck
-_DARK_CATEGORIES = {"dark_mark", "dark_spot"}
-_DARK_MIN_CONTENT = 0.02      # a dark_* box needs at least this fraction of genuinely near-black pixels
-
-
-def _dark_abs(part_ref, category=None):
-    """Darkness cutoff (0..255 gray) for a dark_* box's content/segmentation.
-
-    dark_mark is defined as ABSOLUTE near-black, so it keeps the strict cutoff.
-    dark_spot is defined RELATIVE to the finish ('clearly darker than the surrounding
-    finish'), so on a bright bracket a faint-but-real spot (darker than the metal but
-    not near-black) must still qualify - testing it as absolute near-black is what
-    silently dropped operator-marked edge/scatter dark spots at draw time."""
-    if str(category or "").lower() == "dark_spot":
-        return min(165.0, 0.82 * float(part_ref))
-    return min(110.0, 0.55 * float(part_ref))
-
-
-def _has_dark_content(base, bbox, part_ref, W, H, category=None):
-    """True if a dark_* box actually contains pixels darker than the finish. dark_mark
-    is judged ABSOLUTELY (near-black vs the bright part); dark_spot is judged RELATIVE
-    to the on-part median (clearly darker than the finish), so a faint real spot is not
-    dropped, while a box fabricated on plain grain/tint - which is NOT darker than the
-    finish - is still rejected. part_ref = median brightness of the on-part metal."""
-    if cv2 is None:
-        return True  # can't verify without cv2; don't drop
-    x0, y0, x1, y1 = _bbox_px(bbox, W, H)
-    if x1 - x0 < 2 or y1 - y0 < 2:
-        return False
-    roi = base[y0:y1, x0:x1]
-    gray = cv2.cvtColor(roi, cv2.COLOR_RGB2GRAY)
-    dark_abs = _dark_abs(part_ref, category)
-    mask = (gray < dark_abs).astype(np.uint8)
-
-    # A dark_spot may be a single meaningful spot or a localized cluster of
-    # several small spots. Require coherent dark content and local contrast, but
-    # do not require one large connected component.
-    if str(category or "").lower() == "dark_spot":
-        n, labels, stats, _centroids = cv2.connectedComponentsWithStats(mask, 8)
-        if n <= 1:
-            return False
-        areas = stats[1:, cv2.CC_STAT_AREA]
-        min_component = max(3, int(0.0008 * mask.size))
-        keep = np.zeros_like(mask, dtype=np.uint8)
-        for label, area in enumerate(areas, start=1):
-            if int(area) >= min_component:
-                keep[labels == label] = 1
-        meaningful_area = int(keep.sum())
-        if meaningful_area < max(8, int(0.003 * mask.size)):
-            return False
-
-        core = gray[keep > 0]
-        ring_mask = cv2.dilate(keep, np.ones((5, 5), np.uint8), iterations=1)
-        ring = (ring_mask > 0) & (keep == 0)
-        if not np.any(ring) or core.size == 0:
-            return False
-        local_contrast = float(np.median(gray[ring])) - float(np.median(core))
-        if local_contrast < 8.0:
-            return False
-
-    return float(mask.mean()) >= _DARK_MIN_CONTENT
-
-
-def _tighten_dark_bbox(base, bbox, part_ref, W, H, margin=0.006, category=None):
-    """Shrink a (possibly loose) dark_* box to the LARGEST darker-than-finish blob inside
-    it, so the drawn box hugs the actual dark pixels instead of the surrounding tint.
-    Returns the original bbox when no clean blob is found."""
-    if cv2 is None:
-        return list(bbox)
-    x0, y0, x1, y1 = _bbox_px(bbox, W, H)
-    if x1 - x0 < 2 or y1 - y0 < 2:
-        return list(bbox)
-    roi = base[y0:y1, x0:x1]
-    gray = cv2.cvtColor(roi, cv2.COLOR_RGB2GRAY)
-    dark_abs = _dark_abs(part_ref, category)
-    mask = (gray < dark_abs).astype(np.uint8) * 255
-    mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, np.ones((3, 3), np.uint8))
-    n, _lbl, stats, _c = cv2.connectedComponentsWithStats(mask)
-    if n <= 1:
-        return list(bbox)
-    i = 1 + int(np.argmax(stats[1:, cv2.CC_STAT_AREA]))
-    cx, cy, cw, ch, area = stats[i]
-    if area < 6:
-        return list(bbox)
-    pad = int(margin * max(W, H))
-    mx0 = max(0, x0 + int(cx) - pad)
-    my0 = max(0, y0 + int(cy) - pad)
-    mx1 = min(W, x0 + int(cx) + int(cw) + pad)
-    my1 = min(H, y0 + int(cy) + int(ch) + pad)
-    bw, bh = (mx1 - mx0) / W, (my1 - my0) / H
-    # Floor the hugged box so a faint small spot is not shrunk below the actionable /
-    # visible size and then dropped by the sub-actionable speck gate (the edge/scatter
-    # dark_spot miss). Expand around the blob centre, keeping it on-image.
-    floor = 0.028
-    cxn = (mx0 + (mx1 - mx0) / 2.0) / W
-    cyn = (my0 + (my1 - my0) / 2.0) / H
-    bw, bh = max(bw, floor), max(bh, floor)
-    nx = min(max(0.0, cxn - bw / 2.0), 1.0 - bw)
-    ny = min(max(0.0, cyn - bh / 2.0), 1.0 - bh)
-    return [nx, ny, bw, bh]
-
-
 def _part_mask_full(base, W, H):
     """Solid binary part-silhouette mask (uint8 0/255) for the whole image, via a
     local-texture (std) map + the largest non-background component, filled solid so
@@ -791,10 +690,10 @@ def _clip_bbox_to_part(bbox, part_mask, W, H):
 def _sanitize_region_defects(defects, part_mask, base, W, H):
     """Safety net applied before drawing (also catches an API hallucination):
       1. DROP a box that falls off the part (on background / empty space).
-      2. DROP a dark_* box with no genuine near-black content (fabricated on grain/tint).
-      3. MERGE same-category boxes separated by only a tiny gap into ONE box.
-      4. DROP a lone sub-actionable speck (below the actionability area gate).
-    Line defects pass through untouched. Returns (kept_defects, changed)."""
+      2. MERGE same-category boxes separated by only a tiny gap into ONE box.
+      3. DROP a lone generic sub-actionable speck (below the actionability area gate).
+    Defect semantics remain owned by grounding + model inspection. Returns
+    (kept_defects, changed)."""
     lines = []
     boxes = list(defects)
     changed = False
@@ -808,11 +707,6 @@ def _sanitize_region_defects(defects, part_mask, base, W, H):
                 changed = True
         clipped_lines.append(d)
     lines = clipped_lines
-    part_ref = 180.0
-    if part_mask is not None and cv2 is not None:
-        on = cv2.cvtColor(base, cv2.COLOR_RGB2GRAY)[part_mask > 0]
-        if on.size:
-            part_ref = float(np.median(on))
     # 1. off-part guard + 2. dark-content guard
     on_part = []
     for d in boxes:
