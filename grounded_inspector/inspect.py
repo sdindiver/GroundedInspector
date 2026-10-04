@@ -209,12 +209,13 @@ def _parse_verdict_json(text: str) -> dict:
 
 # --------------------------------------------------------------------------- pipeline
 def inspect_image(part: Optional[str], image_path: str, model: str, meta: dict) -> dict:
-    """Assemble the bundle for (part, image), call the engine, return the full verdict."""
+    """Run the modular architecture for explicit parts; retain auto mode compatibility."""
     if part:
-        bundle = assembler.build_bundle(part, image_path)
-    else:
-        bundle = assembler.build_auto_bundle(image_path)
-    prompt = assembler.render_prompt(bundle) if part else assembler.render_auto_prompt(bundle)
+        from . import modular_pipeline
+        return modular_pipeline.inspect_image(part, image_path, model)
+
+    bundle = assembler.build_auto_bundle(image_path)
+    prompt = assembler.render_auto_prompt(bundle)
     raw = call_engine(prompt, _bundle_images(bundle), model)
     return build_verdict(raw, meta)
 
