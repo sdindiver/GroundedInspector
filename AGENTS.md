@@ -57,15 +57,14 @@ The filename is the canonical identifier. For example:
 
 Do not add aliases or a second identity structure.
 
-A defect contains the fields required by its runtime behavior:
+A defect contains only authoring fields:
 
 - `severity`
 - `display_name`
 - `color`
-- `scope`
-- `reference_dir` when exemplars exist
 - `decision`
-- `annotation` only when the renderer needs defect-specific annotation behavior
+
+The loader derives runtime scope and reference paths. Defect annotation shape is not authored; rendering behavior is derived from the category.
 
 Each decision owns:
 
