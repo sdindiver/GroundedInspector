@@ -1,37 +1,20 @@
 @echo off
-setlocal enabledelayedexpansion
+setlocal
 cd /d "%~dp0"
 
-set "CONFIG=inspect.config"
-
-REM --- First run: create inspect.config from the example and ask the user to fill it in ---
-if not exist "%CONFIG%" (
-  if exist "inspect.config.example" (
-    copy /y "inspect.config.example" "%CONFIG%" >nul
-    echo Created "%CONFIG%" from the example.
-    echo Open it, set ANTHROPIC_API_KEY and IMAGES_FOLDER, then run start.bat again.
-  ) else (
-    echo ERROR: "%CONFIG%" not found and no inspect.config.example to copy.
-  )
-  pause
-  exit /b 1
-)
-
-REM --- Load KEY=VALUE lines from the config (lines starting with # are ignored) ---
-for /f "usebackq eol=# tokens=1,* delims==" %%A in ("%CONFIG%") do set "%%A=%%B"
-
+REM Grounding is configured in grounding/*.json. Runtime secrets/paths come from
+REM environment variables; no inspect.config file is used.
 if "%ANTHROPIC_API_KEY%"=="" (
-  echo ERROR: ANTHROPIC_API_KEY is empty in %CONFIG%.
-  pause
-  exit /b 1
-)
-if "%ANTHROPIC_API_KEY%"=="sk-ant-REPLACE_ME" (
-  echo ERROR: ANTHROPIC_API_KEY is still the placeholder. Put your real key in %CONFIG%.
+  echo ERROR: ANTHROPIC_API_KEY is not set in the environment.
+  echo Set it before running start.bat.
   pause
   exit /b 1
 )
 if "%IMAGES_FOLDER%"=="" (
-  echo ERROR: IMAGES_FOLDER is empty in %CONFIG%.
+  set /p "IMAGES_FOLDER=Enter the image folder path: "
+)
+if "%IMAGES_FOLDER%"=="" (
+  echo ERROR: IMAGES_FOLDER is empty.
   pause
   exit /b 1
 )
