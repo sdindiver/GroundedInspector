@@ -45,10 +45,12 @@ reclassify or suppress defects.
 
 ## Migration boundary
 
-The explicit-part CLI path uses the modular architecture.
+The inspection runtime has been migrated to the modular architecture.
 
-The existing auto-identification path remains compatible legacy orchestration until
-multi-instance anatomy and defect inspection are migrated to the same architecture.
+Explicit-part mode runs shared anatomy followed by every configured defect inspector.
+Auto-identification uses a separate part-identification stage, then routes each
+identified instance through the same shared-anatomy, independent-defect, aggregation,
+and rendering stages.
 
 ## Stability principle
 
@@ -63,9 +65,6 @@ the migration production-stable.
 
 ## Validation
 
-Repository CI runs:
-- grounding schema validation;
-- deterministic modular aggregation unit tests.
-
-Visual regression cases should be added to the same validation strategy as the approved
-inspection dataset grows.
+Local validation is the current acceptance step. Run the application against the
+approved bracket image folder and inspect the generated annotated output in one shot.
+Automated regression protection can be added later after the visual results are accepted.
