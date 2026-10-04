@@ -11,9 +11,6 @@ same:
   * a high-contrast triple-stroke LOCATOR outline (black halo -> white ->
     colour) around it, thicker for the primary (highest-severity) defect;
   * a dark label chip with white text.
-Line-shaped defects (line_mark) are drawn as a tight box around each groove; a defect
-that explicitly supplies line geometry is still stroked as a QMS scratch trace.
-
 The segmentation/marking here mirrors QMSInspector/inspector/renderer.py. It is a
 rendering concern only: the engine (me today, the Anthropic API later) supplies
 the verdict geometry; this module draws it. cv2 is optional - without it the
@@ -49,10 +46,6 @@ _SEG_BY_CATEGORY = {
     "serration_missing": "circle",
 }
 _FILL_ALPHA = 0.30  # QMS blends the colour overlay at 30%.
-
-# Annotation shapes the renderer knows how to draw. The grounding gate asserts every
-# declared annotation.shape is in this set and matches intended_primitive().
-SUPPORTED_ANNOTATION_SHAPES = {"line", "box", "circle"}
 
 
 _STATUS_COLOR = {  # RGB
@@ -106,39 +99,6 @@ def _text_box(draw, text, font, padx=6, pady=5):
     bw = (r - l) + 2 * padx
     bh = (b - t) + 2 * pady
     return bw, bh, padx - l, pady - t
-
-
-def _line_trace(draw, seg, W, H, col, scale=1.0):
-    """QMS-style scratch mark: a THIN SLIVER outline (two near-parallel edges), drawn
-    as a closed 3-stroke polygon (black halo -> white -> colour), mirroring how
-    QMSInspector renders a line/scratch ground-truth polygon via cv2.polylines. A single
-    fat centre stroke does NOT match QMS; the real scratch has width, so we build a thin
-    lens around the reported [x1,y1,x2,y2] centreline and outline it."""
-    if not (isinstance(seg, (list, tuple)) and len(seg) == 4):
-        return None
-    import math
-    x1, y1, x2, y2 = seg
-    p1 = (x1 * W, y1 * H)
-    p2 = (x2 * W, y2 * H)
-    dx, dy = p2[0] - p1[0], p2[1] - p1[1]
-    length = math.hypot(dx, dy) or 1.0
-    # perpendicular unit vector -> half-width of the sliver (QMS scratches ~0.6% of the
-    # short side across the lens).
-    nx, ny = -dy / length, dx / length
-    hw = max(1.5, min(W, H) * 0.0035 * scale)
-    # closed lens: p1+offset -> p2+offset -> p2-offset -> p1-offset
-    poly = [
-        (p1[0] + nx * hw, p1[1] + ny * hw),
-        (p2[0] + nx * hw, p2[1] + ny * hw),
-        (p2[0] - nx * hw, p2[1] - ny * hw),
-        (p1[0] - nx * hw, p1[1] - ny * hw),
-    ]
-    # Thin, crisp trace: a 1px dark halo for contrast on bright metal + the colour
-    # edge. Keeps the scratch clearly visible without a heavy 3-stroke band.
-    base = max(1, int(min(W, H) * 0.001 * scale))
-    for c, wd in (((10, 15, 25), base + 1), (col, base)):
-        draw.line(poly + [poly[0]], fill=c, width=wd, joint="curve")
-    return (int(round(p1[0])), int(round(p1[1])))
 
 
 def _focus_color(col):
@@ -440,60 +400,6 @@ def _draw_label(draw, anchor, label, col, font, W, H, occupied=None):
     draw.text((lx + dx, ly + dy), label, fill=(255, 255, 255), font=font)
     if occupied is not None:
         occupied.append((lx, ly, lx + bw, ly + bh))
-
-
-def _defect_segs(d):
-    """Return normalized line segments for a line-shaped defect, else []."""
-    if isinstance(d.get("lines"), list):
-        return [s for s in d["lines"] if isinstance(s, (list, tuple)) and len(s) == 4]
-    if isinstance(d.get("line"), (list, tuple)) and len(d.get("line")) == 4:
-        return [d["line"]]
-    return []
-
-
-_LINE_CATS_CACHE = None
-
-
-def _line_categories() -> set:
-    """category(lower) set whose bundle annotation.shape == 'line' (global + parts)."""
-    global _LINE_CATS_CACHE
-    if _LINE_CATS_CACHE is None:
-        cats = set()
-        try:
-            cat = C.load_global_catalog()
-            for name, spec in cat.get("defects", {}).items():
-                if (spec.get("annotation") or {}).get("shape") == "line":
-                    cats.add(name.lower())
-            for part in C.list_parts():
-                for name, spec in (part.get("defects", {}) or {}).items():
-                    if (spec.get("annotation") or {}).get("shape") == "line":
-                        cats.add(name.lower())
-        except Exception:  # noqa
-            cats = set()
-        _LINE_CATS_CACHE = cats
-    return _LINE_CATS_CACHE
-
-
-def _is_line_defect(d) -> bool:
-    """Route to the trace path ONLY when the category's DECLARED bundle shape is
-    'line' (single source of truth). A category declared shape:'box' (e.g. line_mark,
-    a tight per-groove box) is ALWAYS drawn as a box - even if a verdict happens to
-    carry stray line geometry - so a box/line drawing decision can never be half-applied
-    by the geometry a verdict contains. This keeps runtime dispatch identical to
-    intended_primitive(), which the grounding gate asserts equals annotation.shape."""
-    return intended_primitive(d.get("category", "")) == "line"
-
-
-def intended_primitive(category: str) -> str:
-    """The primitive the renderer will draw for a category, derived from the SAME logic
-    as dispatch, so the grounding gate can assert it equals the bundle's declared
-    annotation.shape (catches a half-applied 'how it's drawn' change)."""
-    cat = str(category).lower()
-    if cat in _line_categories():
-        return "line"
-    if _SEG_BY_CATEGORY.get(cat) == "circle":
-        return "circle"
-    return "box"
 
 
 def _qms_ml_label(d) -> str:
@@ -1081,15 +987,12 @@ def render_annotated(image_path: str, verdict: dict, out_path: Optional[str] = N
         for anchor, label, col, fnt, _rrect in label_jobs:
             _draw_label(draw, anchor, label, col, fnt, W, H, occupied)
 
-    top_idx = 0
-    for gi, defects in enumerate(groups):
-        fnt, _thick, scale = group_style[gi]
-        for d in defects:
-            if _is_line_defect(d):
-                top_idx = _draw_line_defect(draw, d, W, H, colors, fnt,
-                                            d is group_primary[gi], top_idx, scale,
-                                            occupied)
-            elif cv2 is None:  # no cv2: fall back to a plain filled box + label
+    # All configured defects are region annotations; category-specific segmentation
+    # is handled by _SEG_BY_CATEGORY above.
+    if cv2 is None:
+        for gi, defects in enumerate(groups):
+            fnt, _thick, _scale = group_style[gi]
+            for d in defects:
                 _fallback_box(draw, d, W, H, colors, fnt)
 
     # QMS marks a clean part with a green border + banner (defect frames carry no
