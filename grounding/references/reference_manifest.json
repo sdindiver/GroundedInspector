@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "purpose": "Curated visual reference set for grounding decisions.",
+  "status": "awaiting_uploaded_reference_images",
+  "categories": {
+    "bracket/serration": [],
+    "bracket/embossing_missing": [],
+    "bracket/incomplete_embossing": [],
+    "bracket/line_mark": [],
+    "bracket/dark_spot": [],
+    "bracket/corrosion": [],
+    "bracket/face/front": [],
+    "bracket/face/back": [],
+    "bracket/face/review": []
+  },
+  "required_metadata": [
+    "image",
+    "expected",
+    "reason",
+    "annotation"
+  ]
+}
