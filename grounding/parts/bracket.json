@@ -8,7 +8,9 @@
       "roles": {
         "serrated": "largest hole",
         "plain": "the other two holes"
-      }
+      },
+      "identification": "The serrated hole is the physically largest hole of the three. Identify the largest hole from its overall hole/rim diameter, not from the apparent diameter of the inner bore/opening alone. The serrated teeth project inward and can make the visible central opening look smaller than a plain hole. Perspective, foreshortening, lighting, and countersink/dish effects can also change apparent inner-opening size.",
+      "inspection": "First select the physically largest hole from the overall hole/rim size. Then inspect the inner circumference of that selected hole for the serrated/toothed pattern. Never select a hole merely because its smooth inner opening looks largest or because it has the most obvious dark bore."
     },
     "face": {
       "purpose": "Authoritative front/back orientation rule shared by all checks that depend on face orientation.",
@@ -51,9 +53,9 @@
         200
       ],
       "decision": {
-        "check": "Inspect the largest hole and determine whether any clearly visible section of its bore/opening circumference has the required serrated/toothed pattern.",
+        "check": "First identify the physically largest of the three holes from its overall hole/rim diameter. Then inspect that selected hole's inner circumference/bore edge for the required serrated/toothed pattern.",
         "defect_when": "The required serrated/toothed pattern is not visibly present on the circumference of the largest hole.",
-        "clear_when": "One or more clearly visible sections of the circumference of the largest hole show the required serrated/toothed pattern. The full circumference does not need to be visible if the visible teeth clearly establish that the serration is present.",
+        "clear_when": "The selected largest hole shows one or more clearly visible sections of its inner circumference with the required serrated/toothed pattern. The full circumference does not need to be visible; repeated teeth/scallops on any clear section are sufficient.",
         "review_when": "Never use NEEDS_REVIEW for serration presence. If the required teeth cannot be clearly confirmed, treat serration as missing.",
         "ignore": [
           "Bore brightness or glare.",
@@ -61,7 +63,7 @@
           "Damage or appearance inside the bore.",
           "Plain-hole appearance."
         ],
-        "boundary": "The serration check belongs to the largest hole. A clear toothed pattern on any visible section of that hole is sufficient to establish that serration is present.",
+        "boundary": "Hole selection and serration evidence are separate steps: select the physically largest hole by overall hole/rim diameter first, then inspect its inner circumference. Do not use the apparent smooth inner-bore diameter to choose the hole, because inward-projecting serration teeth can make the serrated opening look smaller. A visible toothed/scalloped section on the selected largest hole is CLEAR even when the teeth are shallow, low-contrast, partially visible, or the bore is bright/dished.",
         "localization": "Tight box around the largest hole including the visible serrated circumference and bore."
       }
     },
