@@ -15,12 +15,6 @@ def _read_json(path: str) -> dict:
 def load_global_catalog() -> dict:
     return _read_json(os.path.join(GROUNDING_DIR, "defects.json"))
 
-def load_global_rules() -> dict:
-    path = os.path.join(GROUNDING_DIR, "global_rules.json")
-    if not os.path.isfile(path):
-        return {}
-    return _read_json(path)
-
 def load_verification_config() -> dict:
     path = os.path.join(GROUNDING_DIR, "verification.json")
     return _read_json(path) if os.path.isfile(path) else {}
