@@ -684,7 +684,7 @@ def _draw_instance_frame(draw, inst, box_px, W, H, font):
 
 
 # --- Verdict safety-net guards (catch a fabricated / hallucinated box before drawing) ---
-_OFFPART_MIN_OVERLAP = 0.10   # a box overlapping the part silhouette by less than this is off-part
+_OFFPART_MIN_OVERLAP = 0.50   # a box overlapping the part silhouette by less than this is off-part
 _MERGE_GAP = 0.05             # normalized max gap between same-category boxes that collapse into one
 _MIN_ACTIONABLE_AREA = 0.0004  # normalized area; a lone box smaller than this is a non-actionable speck
 _DARK_CATEGORIES = {"dark_mark", "dark_spot"}
@@ -841,6 +841,63 @@ def _merge_same_category(defects):
     return [d for _b, d in items]
 
 
+def _clip_bbox_to_part(bbox, part_mask, W, H):
+    """Keep the reported rectangle on the detected part without tightening to pixels.
+
+    This changes only the portion that would extend beyond the part silhouette; it
+    does not search for or shrink the box around the defect itself.
+    """
+    if part_mask is None or cv2 is None:
+        return list(bbox)
+    x, y, w, h = [float(v) for v in bbox]
+    x0, y0, x1, y1 = x, y, x + w, y + h
+    px0, py0, px1, py1 = _bbox_px([x0, y0, max(0.0, w), max(0.0, h)], W, H)
+    if px1 <= px0 or py1 <= py0:
+        return list(bbox)
+    # Trim only the portion that lies outside the part silhouette. We do
+    # not tighten around defect pixels. The final rectangle must be entirely
+    # inside the solid outer-part silhouette.
+    max_steps = max(1, (px1 - px0) + (py1 - py0))
+    for _ in range(max_steps):
+        sub = part_mask[py0:py1, px0:px1]
+        if sub.size == 0 or bool(np.all(sub > 0)):
+            break
+        candidates = []
+        if py1 - py0 > 2:
+            candidates.append(("top", int(np.count_nonzero(sub[0] == 0))))
+            candidates.append(("bottom", int(np.count_nonzero(sub[-1] == 0))))
+        if px1 - px0 > 2:
+            candidates.append(("left", int(np.count_nonzero(sub[:, 0] == 0))))
+            candidates.append(("right", int(np.count_nonzero(sub[:, -1] == 0))))
+        if not candidates:
+            break
+        side, score = max(candidates, key=lambda item: item[1])
+        if score <= 0:
+            # Background remains only in the interior; remove the side with
+            # the largest total background count until the rectangle is valid.
+            candidates = [
+                ("top", int(np.count_nonzero(sub[0] == 0))),
+                ("bottom", int(np.count_nonzero(sub[-1] == 0))),
+                ("left", int(np.count_nonzero(sub[:, 0] == 0))),
+                ("right", int(np.count_nonzero(sub[:, -1] == 0))),
+            ]
+            side, score = max(candidates, key=lambda item: item[1])
+            if score <= 0:
+                break
+        if side == "top":
+            py0 += 1
+        elif side == "bottom":
+            py1 -= 1
+        elif side == "left":
+            px0 += 1
+        else:
+            px1 -= 1
+    # Convert the boundary-clipped pixel rectangle back to normalized coordinates.
+    nx0, ny0 = px0 / float(W), py0 / float(H)
+    nx1, ny1 = px1 / float(W), py1 / float(H)
+    return [nx0, ny0, max(0.0, nx1 - nx0), max(0.0, ny1 - ny0)]
+
+
 def _sanitize_region_defects(defects, part_mask, base, W, H):
     """Safety net applied before drawing (also catches an API hallucination):
       1. DROP a box that falls off the part (on background / empty space).
@@ -851,6 +908,17 @@ def _sanitize_region_defects(defects, part_mask, base, W, H):
     lines = [d for d in defects if _is_line_defect(d)]
     boxes = [d for d in defects if not _is_line_defect(d)]
     changed = False
+    # Line defects are also region annotations: their boxes must stay on the part.
+    clipped_lines = []
+    for d in lines:
+        if isinstance(d.get("bbox"), (list, tuple)) and len(d.get("bbox")) == 4 and part_mask is not None:
+            clipped = _clip_bbox_to_part(d["bbox"], part_mask, W, H)
+            if [round(v, 6) for v in clipped] != [round(float(v), 6) for v in d["bbox"]]:
+                d = dict(d)
+                d["bbox"] = clipped
+                changed = True
+        clipped_lines.append(d)
+    lines = clipped_lines
     part_ref = 180.0
     if part_mask is not None and cv2 is not None:
         on = cv2.cvtColor(base, cv2.COLOR_RGB2GRAY)[part_mask > 0]
@@ -873,15 +941,17 @@ def _sanitize_region_defects(defects, part_mask, base, W, H):
                 if not _has_dark_content(base, bb, part_ref, W, H, cat):
                     changed = True
                     continue
-                # dark_mark is a tight near-black blotch -> hug the dark pixels.
-                # dark_spot is a soft-edged smudge -> keep the full reported footprint
-                # (shrinking to the darkest core gives a tiny box unlike the operator mark).
-                if cat == "dark_mark":
-                    tight = _tighten_dark_bbox(base, bb, part_ref, W, H, category=cat)
-                    if [round(v, 6) for v in tight] != [round(float(v), 6) for v in bb]:
-                        d = dict(d)
-                        d["bbox"] = tight
-                        changed = True
+                # Do not tighten dark_* boxes to the dark pixels. The model's
+                # reported footprint is authoritative. We only constrain the rectangle
+                # to the detected part silhouette so an annotation cannot extend into
+                # the background.
+        # Keep region boxes on the part, but do not tighten them to defect pixels.
+        if isinstance(d.get("bbox"), (list, tuple)) and len(d.get("bbox")) == 4 and part_mask is not None:
+            clipped = _clip_bbox_to_part(d["bbox"], part_mask, W, H)
+            if [round(v, 6) for v in clipped] != [round(float(v), 6) for v in d["bbox"]]:
+                d = dict(d)
+                d["bbox"] = clipped
+                changed = True
         on_part.append(d)
     # 3. merge same-category near boxes
     merged = _merge_same_category(on_part)

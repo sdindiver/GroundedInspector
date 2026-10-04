@@ -60,9 +60,12 @@ def _catalog_meta() -> dict:
 
 
 def build_verdict(raw: dict, meta: dict) -> dict:
-    """Expand the engine's raw decision {"defects":[{category,bbox,factors|confidence}]}
-    into a full verdict, resolving severity/display_name from the bundle and confidence
-    from <defect>.confidence_model when the engine returned by-eye `factors`."""
+    """Normalize the engine verdict without dropping fields required by the output contract.
+
+    Grounding resolves catalog metadata (severity/display_name), while the model's
+    evidence fields (reason, location, lines, checkpoints, review reason, etc.) are
+    preserved so the renderer and callers see the complete verdict.
+    """
     defects = []
     top = 0.0
     for d in raw.get("defects", []) or []:
@@ -70,28 +73,45 @@ def build_verdict(raw: dict, meta: dict) -> dict:
         if not cat or "bbox" not in d:
             continue
         m = meta.get(cat, {"severity": 2, "display_name": cat.replace("_", " ").title()})
-        if "confidence" in d and d["confidence"] is not None:
-            conf = float(d["confidence"])
-        elif d.get("factors"):
+        factors = d.get("confidence_factors") or d.get("factors")
+        if factors:
             try:
-                conf = confidence.score(cat, d["factors"])[0]
+                conf = confidence.score(cat, factors)[0]
             except ValueError:
-                conf = 0.0
+                conf = float(d.get("confidence", 0.0) or 0.0)
+        elif "confidence" in d and d["confidence"] is not None:
+            conf = float(d["confidence"])
         else:
             conf = 0.0
         top = max(top, conf)
-        defects.append({
+        item = {
             "category": cat,
+            "scope": d.get("scope", "part" if cat in meta else "global"),
             "severity": m["severity"],
-            "confidence": round(conf, 2),
-            "display_name": m["display_name"],
             "bbox": list(d["bbox"]),
-        })
-    # honor the engine's own result if given, else derive from the 0.60 band
+            "confidence": round(conf, 2),
+            "reason": d.get("reason", ""),
+            "display_name": m["display_name"],
+        }
+        for key in ("line", "lines", "location"):
+            if key in d:
+                item[key] = d[key]
+        defects.append(item)
+
     result = raw.get("result")
     if result not in (_DEFECT, _REVIEW, _OK):
         result = _OK if not defects else (_DEFECT if top >= 0.60 else _REVIEW)
-    return {"result": result, "defects": defects}
+
+    verdict = {
+        "part": raw.get("part"),
+        "image": raw.get("image"),
+        "result": result,
+        "primary": raw.get("primary"),
+        "needs_review_reason": raw.get("needs_review_reason"),
+        "checkpoints": raw.get("checkpoints", []) or [],
+        "defects": defects,
+    }
+    return verdict
 
 
 # ------------------------------------------------------------------- API engine call

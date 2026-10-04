@@ -29,7 +29,7 @@ def _find_model(category: str) -> Optional[dict]:
     if spec and spec.get("confidence_model"):
         return spec["confidence_model"]
     for part in C.list_parts():
-        spec = (part.get("part_defects", {}) or {}).get(key)
+        spec = (part.get("defects", part.get("part_defects", {})) or {}).get(key)
         if spec and spec.get("confidence_model"):
             return spec["confidence_model"]
     return None

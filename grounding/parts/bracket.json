@@ -1,16 +1,142 @@
 {
-  "schema_version":2,
-  "part":"Bracket",
-  "aliases":["bracket","strap","mounting bracket"],
-  "description":"Flat stamped steel mounting bracket/strap with exactly three in-line holes: two plain holes and one serrated hole.",
-  "identity":{"summary":"Flat thin elongated steel strap with rounded ends, exactly three in-line holes, one serrated/toothed hole, and a VA emboss on the front face.","distinguishing_features":["flat thin strap with rounded ends","exactly 3 in-line holes","one hole has a serrated/toothed rim and is the largest","VA emboss is expected on the front face"],"not_to_confuse_with":["bearing_cup"]},
-  "anatomy":{"holes":{"count":3,"roles":{"serrated":"largest hole","plain":"the other two holes"}},"face":{"front":"outer edge is chamfered/rolled; plain holes are countersunk/dished","back":"outer edge is square/sharp; plain holes are flat through-holes","unresolved":"edge/countersink profile is unreadable"},"va_location":"between the middle hole and the plain end-hole, on the side of the middle hole opposite the serrated hole"},
-  "inspection":["orientation","serration_missing","embossing_missing","incomplete_embossing","line_mark","dark_mark","dark_spot","white_mark","dent","edge_chip","corrosion"],
-  "include_defects":[],
-  "golden_images":["grounding/references/parts/bracket/golden"],
-  "defects":{
-    "serration_missing":{"severity":4,"display_name":"Serration Missing","color":[200,0,200],"scope":"part","reference_dir":"grounding/references/parts/bracket/defects/serration_missing","decision":{"check":"Identify the largest of the three holes, then inspect its outer rim/edge—not the bore fill.","defect_when":"The largest hole's rim is clearly a smooth continuous circle with no scallops/teeth. Whole-part tie-breaker: a good bracket always shows a scalloped rim on the serrated hole (on either face), so if no hole anywhere on the part shows a scalloped rim, serration is missing—flag the largest hole confidently rather than returning NEEDS_REVIEW.","clear_when":"The largest hole's rim clearly shows the expected scalloped/cog-toothed pattern.","review_when":"Glare or an oblique angle makes a specific rim unreadable and that same hole could still plausibly be serrated. A matte/soft-focus finish or a countersink dish is not itself a reason to review (a dish hides the bore, not the rim scallops); an all-rims-smooth part is serration_missing, never NEEDS_REVIEW.","ignore":["Smooth-looking bore caused by countersink/dome.","Bore brightness or glare.","Plain-hole appearance."],"boundary":"A good serrated rim remains visibly scalloped even when the bore is bright or dished.","localization":"Tight box around the largest hole including its rim and bore; never a smaller hole or blank metal."}},
-    "incomplete_embossing":{"severity":3,"display_name":"Incomplete/Shallow Embossing","color":[255,90,0],"scope":"part","reference_dir":"grounding/references/parts/bracket/defects/incomplete_embossing","decision":{"check":"After front face is established, inspect the VA marking at its designated location.","defect_when":"VA is present but one or more required characters is clearly shallower, fainter or less complete than the other.","clear_when":"VA is clearly present with consistent character depth and formation.","review_when":"A character difference could be glare, shadow, dirt or insufficient resolution.","ignore":["Blank VA on the back face; that is normal."],"localization":"Tight box around the affected VA character(s)."}},
-    "embossing_missing":{"severity":4,"display_name":"Embossing Missing","color":[255,40,0],"scope":"part","reference_dir":"grounding/references/parts/bracket/defects/embossing_missing","decision":{"check":"Establish front/back from the outer-edge profile before reading the VA zone.","defect_when":"Front face is confirmed by a chamfered/rolled edge and countersunk plain holes, and the designated VA zone is blank.","clear_when":"Front face is confirmed and VA is present; or back face is confirmed and VA is blank.","review_when":"The outer-edge/countersink profile cannot reliably establish front versus back.","ignore":["Using a blank VA zone alone to infer the back face.","Glare, shadow or dirt mistaken for a missing mark."],"localization":"Tight box around the designated VA zone."}}
+  "schema_version": 2,
+  "part": "Bracket",
+  "aliases": [
+    "bracket",
+    "strap",
+    "mounting bracket"
+  ],
+  "description": "Flat stamped steel mounting bracket/strap with exactly three in-line holes: two plain holes and one serrated hole.",
+  "identity": {
+    "summary": "Flat thin elongated steel strap with rounded ends, exactly three in-line holes, one serrated/toothed hole, and a VA emboss on the front face.",
+    "distinguishing_features": [
+      "flat thin strap with rounded ends",
+      "exactly 3 in-line holes",
+      "one hole has a serrated/toothed rim and is the largest",
+      "VA emboss is expected on the front face"
+    ],
+    "not_to_confuse_with": [
+      "bearing_cup"
+    ]
+  },
+  "anatomy": {
+    "holes": {
+      "count": 3,
+      "roles": {
+        "serrated": "largest hole",
+        "plain": "the other two holes"
+      }
+    },
+    "face": {
+      "front": "outer edge is chamfered/rolled; plain holes are countersunk/dished",
+      "back": "outer edge is square/sharp; plain holes are flat through-holes",
+      "unresolved": "edge/countersink profile is unreadable"
+    },
+    "va_location": "between the middle hole and the plain end-hole, on the side of the middle hole opposite the serrated hole"
+  },
+  "inspection": [
+    "orientation",
+    "serration_missing",
+    "embossing_missing",
+    "incomplete_embossing",
+    "line_mark",
+    "dark_mark",
+    "dark_spot",
+    "white_mark",
+    "dent",
+    "edge_chip",
+    "corrosion"
+  ],
+  "include_defects": [],
+  "golden_images": [
+    "grounding/references/parts/bracket/golden"
+  ],
+  "defects": {
+    "serration_missing": {
+      "severity": 4,
+      "display_name": "Serration Missing",
+      "color": [
+        200,
+        0,
+        200
+      ],
+      "scope": "part",
+      "reference_dir": "grounding/references/parts/bracket/defects/serration_missing",
+      "decision": {
+        "check": "Identify the largest of the three holes, then inspect its outer rim/edge—not the bore fill.",
+        "defect_when": "The largest hole's rim is clearly a smooth continuous circle with no scallops/teeth. Whole-part tie-breaker: a good bracket always shows a scalloped rim on the serrated hole (on either face), so if no hole anywhere on the part shows a scalloped rim, serration is missing—flag the largest hole confidently rather than returning NEEDS_REVIEW.",
+        "clear_when": "The largest hole's rim clearly shows the expected scalloped/cog-toothed pattern.",
+        "review_when": "Glare or an oblique angle makes a specific rim unreadable and that same hole could still plausibly be serrated. A matte/soft-focus finish or a countersink dish is not itself a reason to review (a dish hides the bore, not the rim scallops); an all-rims-smooth part is serration_missing, never NEEDS_REVIEW.",
+        "ignore": [
+          "Smooth-looking bore caused by countersink/dome.",
+          "Bore brightness or glare.",
+          "Plain-hole appearance."
+        ],
+        "boundary": "A good serrated rim remains visibly scalloped even when the bore is bright or dished.",
+        "localization": "Tight box around the largest hole including its rim and bore; never a smaller hole or blank metal.",
+        "confidence_model": {
+          "method": "weighted_evidence",
+          "formula": "confidence = sum(weight_i * factor_i) / sum(weight_i). Factors are judged visually from the image; code only combines them.",
+          "factors": {
+            "rim_smoothness": {
+              "weight": 0.5,
+              "meaning": "How clearly the designated largest hole rim is a smooth circle with no scallops/teeth. 1.0 = clearly smooth/toothless; 0.5 = ambiguous; 0.0 = teeth clearly present."
+            },
+            "evidence_readability": {
+              "weight": 0.3,
+              "meaning": "How clearly the rim can be read. 1.0 = crisp and unobstructed; lower for glare, oblique angle, blur, or anything that genuinely hides the rim."
+            },
+            "anchor_certainty": {
+              "weight": 0.2,
+              "meaning": "How certain the inspected hole is the designated serrated hole, which is the largest of the three. 1.0 = clearly largest."
+            }
+          },
+          "bands": "Crisp smooth rim + readable + clearly largest should be 0.90-1.0; softened/ambiguous evidence should be 0.60-0.75; genuinely unreadable rim should be below 0.60 and NEEDS_REVIEW. Confidence tracks clarity of missing-teeth evidence, not severity."
+        }
+      }
+    },
+    "incomplete_embossing": {
+      "severity": 3,
+      "display_name": "Incomplete/Shallow Embossing",
+      "color": [
+        255,
+        90,
+        0
+      ],
+      "scope": "part",
+      "reference_dir": "grounding/references/parts/bracket/defects/incomplete_embossing",
+      "decision": {
+        "check": "After front face is established, inspect the VA marking at its designated location.",
+        "defect_when": "VA is present but one or more required characters is clearly shallower, fainter or less complete than the other.",
+        "clear_when": "VA is clearly present with consistent character depth and formation.",
+        "review_when": "A character difference could be glare, shadow, dirt or insufficient resolution.",
+        "ignore": [
+          "Blank VA on the back face; that is normal."
+        ],
+        "localization": "Tight box around the affected VA character(s)."
+      }
+    },
+    "embossing_missing": {
+      "severity": 4,
+      "display_name": "Embossing Missing",
+      "color": [
+        255,
+        40,
+        0
+      ],
+      "scope": "part",
+      "reference_dir": "grounding/references/parts/bracket/defects/embossing_missing",
+      "decision": {
+        "check": "Establish front/back from the outer-edge profile before reading the VA zone.",
+        "defect_when": "Front face is confirmed by a chamfered/rolled edge and countersunk plain holes, and the designated VA zone is blank.",
+        "clear_when": "Front face is confirmed and VA is present; or back face is confirmed and VA is blank.",
+        "review_when": "The outer-edge/countersink profile cannot reliably establish front versus back.",
+        "ignore": [
+          "Using a blank VA zone alone to infer the back face.",
+          "Glare, shadow or dirt mistaken for a missing mark."
+        ],
+        "localization": "Tight box around the designated VA zone."
+      }
+    }
   }
 }
