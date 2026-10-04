@@ -114,13 +114,12 @@ def resolve_defects(part: dict, catalog: Optional[dict] = None) -> List[dict]:
         })
 
     for cat, spec in (catalog.get("defects", {}) or {}).items():
-        if spec.get("scope") == "all":
-            add(
-                cat,
-                spec,
-                "global",
-                os.path.join("grounding", "references", "global", cat),
-            )
+        add(
+            cat,
+            spec,
+            "global",
+            os.path.join("grounding", "references", "global", cat),
+        )
 
     for cat, spec in (part.get("defects", {}) or {}).items():
         add(
