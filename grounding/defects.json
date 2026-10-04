@@ -99,9 +99,9 @@
       ],
       "decision": {
         "check": "Sweep the whole visible surface, every outer edge/rim and every hole/feature border.",
-        "defect_when": "A clearly visible, distinct dark surface blemish is present on the metal and is significant enough to be a reportable marking. It may be small or large, dark gray, brown-black, or near-black. When the blemish is connected, patch-like, irregular, or elongated, classify it as dark_mark.",
+        "defect_when": "A clearly visible, distinct, localized dark surface blemish is present on the metal and has a clear local footprint that is reportable as a marking. It may be small or large and may be dark gray, brown-black, purple-gray, or near-black; near-black color or extreme contrast is not required. A bounded dark patch or smear with a visible local boundary, including a dark area adjacent to or surrounding a hole but outside the bore/shadow, is reportable when it is visually distinct from the normal finish. When the blemish is connected, patch-like, irregular, or elongated, classify it as dark_mark.",
         "clear_when": "No clearly visible, distinct, reportable dark surface marking is present.",
-        "review_when": "A candidate dark region cannot be reliably separated from normal finish, glare, shadow, lighting gradient, or image noise.",
+        "review_when": "A candidate dark region is visible but its local boundary or surface character cannot be reliably separated from hole shadow, normal finish/passivation, glare, shadow, lighting gradient, or image noise.",
         "ignore": [
           "Rainbow/passivation tint.",
           "Hole bore or its shadow.",
@@ -110,7 +110,7 @@
         ],
         "enumeration": "Report every distinct reportable dark_mark with its own tight box.",
         "localization": "Tight box around the actual dark marking, not the surrounding metal.",
-        "boundary": "Dark_mark is based on the character of the marking, not a minimum length or width. A small but clearly visible and reportable connected/patch-like/elongated marking is still dark_mark. A compact isolated reportable blemish is dark_spot."
+        "boundary": "Dark_mark is based on a distinct reportable surface blemish, not near-black color or a minimum size. A bounded connected/patch-like/irregular/elongated dark area can be dark_mark even at moderate contrast. Exclude the hole bore and its shadow; classify a compact isolated spot as dark_spot."
       }
     },
     "dark_spot": {
