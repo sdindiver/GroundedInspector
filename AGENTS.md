@@ -11,7 +11,7 @@ Keep the project minimal and auditable:
 - Do not add aliases, duplicate identity metadata, "do not confuse" lists, parallel rule fields, or speculative configuration.
 - Part selection uses the canonical part name and filename.
 - Defect decisions live in `grounding/defects.json` or the owning part file.
-- Do not use `inspect.config`.
+- `inspect.config` is runtime production configuration only; grounding rules must not depend on it.
 
 ## Current architecture
 
