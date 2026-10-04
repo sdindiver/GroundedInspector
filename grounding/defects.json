@@ -120,8 +120,8 @@
       ],
       "decision": {
         "check": "Sweep the entire visible metal surface systematically, including the area around markings, holes, edges and transitions.",
-        "defect_when": "A clearly visible, distinct compact dark surface blemish is present and is significant enough to be a reportable defect. It is isolated and spot-like rather than a connected patch or elongated marking. Size alone does not make it a defect.",
-        "clear_when": "The inspected surface has no clearly visible, distinct, reportable compact dark blemish.",
+        "defect_when": "A clearly visible, distinct localized dark surface blemish is present and is significant enough to be a reportable defect. The blemish may be compact, narrow, irregular, or slightly elongated; it does not need to be circular or have a minimum width. It is a localized spot-like feature, not a continuous groove or a broad connected patch.",
+        "clear_when": "The inspected surface has no clearly visible, distinct, reportable localized dark blemish.",
         "review_when": "A localized dark feature is visible but resolution, glare, shadow or finish variation prevents deciding whether it is a real reportable surface blemish.",
         "ignore": [
           "Hole bore or hole shadow.",
