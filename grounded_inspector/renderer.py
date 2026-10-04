@@ -423,50 +423,6 @@ def _draw_qms_ml_chip(draw, label, font, W, H, occupied=None):
         occupied.append((lx, ly, lx + bw, ly + bh))
 
 
-def _draw_line_defect(draw, d, W, H, colors, font, is_primary, top_idx, scale=1.0, occupied=None):
-    """Draw QMS-style thin scratch traces for a line defect and a label anchored at
-    the scratch itself (so in a multi-part frame the label sits on the right part,
-    not stacked in the whole-image corner)."""
-    col = colors.get(str(d.get("category", "")).lower(), (245, 158, 11))
-    segs = _defect_segs(d)
-    if not segs:
-        # Direction-uncertain fallback: the groove is visible but its path could not
-        # be traced end-to-end. Draw a TIGHT region box around the reported bbox so
-        # the mark is flagged in place instead of omitted.
-        bbox = d.get("bbox") or [0, 0, 0, 0]
-        if len(bbox) != 4 or (bbox[2] <= 0 and bbox[3] <= 0):
-            return top_idx
-        x0, y0, x1, y1 = _bbox_px(bbox, W, H)
-        x0, x1 = sorted((x0, x1))
-        y0, y1 = sorted((y0, y1))
-        for pad, c, wd in ((2, (10, 15, 25), 6), (0, col, 3)):
-            draw.rectangle([x0 - pad, y0 - pad, x1 + pad, y1 + pad], outline=c, width=wd)
-        if str(d.get("category", "")).lower() == "line_mark":
-            _draw_qms_ml_chip(draw, _qms_ml_label(d), font, W, H, occupied)
-        else:
-            _draw_label(draw, (x0, y0), _defect_label(d, is_primary), col, font, W, H)
-        return top_idx + 1
-    for s in segs:
-        _line_trace(draw, s, W, H, col, scale=scale)
-    # QMS renders line marks (ML-ensemble) with a red-bordered 'Line Mark (ML NN%)'
-    # chip in the top-left corner, not a per-scratch [P#] tag. Match it exactly.
-    if str(d.get("category", "")).lower() == "line_mark":
-        _draw_qms_ml_chip(draw, _qms_ml_label(d), font, W, H, occupied)
-        return top_idx + 1
-    label = _defect_label(d, is_primary)
-    bw, bh, dx, dy = _text_box(draw, label, font)
-    pts = [(s[0] * W, s[1] * H) for s in segs] + [(s[2] * W, s[3] * H) for s in segs]
-    ax = min(p[0] for p in pts)
-    ay = min(p[1] for p in pts)
-    lx, ly = _place_label((ax, ay - bh - 2), bw, bh, occupied, W, H)
-    draw.rectangle([lx, ly, lx + bw, ly + bh], fill=(12, 18, 28))
-    draw.rectangle([lx, ly, lx + bw, ly + bh], outline=col, width=2)
-    draw.text((lx + dx, ly + dy), label, fill=(255, 255, 255), font=font)
-    if occupied is not None:
-        occupied.append((lx, ly, lx + bw, ly + bh))
-    return top_idx + 1
-
-
 def _tighten_to_part(base, box):
     """Shrink a loose instance box to the actual PART silhouette inside it.
 
@@ -804,6 +760,11 @@ def _clip_bbox_to_part(bbox, part_mask, W, H):
     return [nx0, ny0, max(0.0, nx1 - nx0), max(0.0, ny1 - ny0)]
 
 
+
+def _is_line_defect(d) -> bool:
+    """All configured defects are rendered as regions."""
+    return False
+
 def _sanitize_region_defects(defects, part_mask, base, W, H):
     """Safety net applied before drawing (also catches an API hallucination):
       1. DROP a box that falls off the part (on background / empty space).
@@ -811,8 +772,8 @@ def _sanitize_region_defects(defects, part_mask, base, W, H):
       3. MERGE same-category boxes separated by only a tiny gap into ONE box.
       4. DROP a lone sub-actionable speck (below the actionability area gate).
     Line defects pass through untouched. Returns (kept_defects, changed)."""
-    lines = [d for d in defects if _is_line_defect(d)]
-    boxes = [d for d in defects if not _is_line_defect(d)]
+    lines = []
+    boxes = list(defects)
     changed = False
     # Line defects are also region annotations: their boxes must stay on the part.
     clipped_lines = []
