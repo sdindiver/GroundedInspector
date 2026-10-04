@@ -31,7 +31,7 @@ API later) returns a JSON verdict, and the renderer draws it.
 
 ## Add a part
 
-See **AGENTS.md → "ADDING A NEW PART"**. In short: create `grounding/parts/<part>.json`,
+See **`grounding/AUTHORING.md`**. In short: create `grounding/parts/<part>.json`,
 drop a golden + one exemplar per defect under `grounding/references/parts/<part>/`, then:
 
 ```
