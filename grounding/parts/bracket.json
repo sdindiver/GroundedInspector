@@ -11,9 +11,13 @@
       }
     },
     "face": {
-      "front": "outer edge is chamfered/rolled; plain holes are countersunk/dished",
-      "back": "outer edge is square/sharp; plain holes are flat through-holes",
-      "unresolved": "edge/countersink profile is unreadable or lighting/view angle makes the face cues ambiguous"
+      "purpose": "Authoritative front/back orientation rule shared by all checks that depend on face orientation.",
+      "decision_order": "First establish front/back from the overall visible face geometry. Use the outer edge profile and the two plain-hole forms together. Do not use VA presence or absence to decide orientation.",
+      "front": "Front is indicated by a chamfered/rolled outer edge and plain holes that are countersunk/dished. Either cue may be subtle; do not require a textbook-clear appearance of both cues.",
+      "back": "Back is indicated by a square/sharp outer edge and plain holes that are flat through-holes. Either cue may be subtle; do not require a textbook-clear appearance of both cues.",
+      "lighting_tolerance": "Lighting, reflection, viewing angle, and shallow countersinks can make a front-face cue look flatter or less pronounced. Judge the combined edge and plain-hole geometry rather than rejecting front solely because the countersink is subtle.",
+      "unresolved": "Use only when the visible edge and plain-hole geometry is genuinely insufficient or contradictory for front/back orientation. Do not declare unresolved merely because one front/back cue is subtle.",
+      "for_dependent_checks": "Once front is established, checks such as embossing_missing and incomplete_embossing may evaluate the VA. Once back is established, a blank VA is normal for those checks."
     },
     "va": {
       "face": "front",
@@ -70,8 +74,8 @@
         0
       ],
       "decision": {
-        "check": "After the shared VA orientation prerequisite is satisfied, inspect the VA marking at its designated location.",
-        "defect_when": "The front face is established, VA is present, and one or more required characters is visibly incomplete, partially formed, or clearly shallower/fainter than the other VA characters.",
+        "check": "After the authoritative anatomy.face orientation rule establishes the front face, inspect the VA marking at its designated location.",
+        "defect_when": "Front is established by the shared anatomy.face rule, VA is present, and one or more required characters is visibly incomplete, partially formed, or clearly shallower/fainter than the other VA characters.",
         "clear_when": "The front face is established, VA is clearly present, and all required characters are fully formed with consistent visible depth and definition; or the back face is established, where VA absence is normal.",
         "review_when": "The shared face orientation cannot be reliably established, or after front is established the VA characters cannot be reliably judged because glare, shadow, dirt, blur, or insufficient resolution prevents comparison of their formation or depth.",
         "ignore": [
@@ -92,8 +96,8 @@
         0
       ],
       "decision": {
-        "check": "After the shared VA orientation prerequisite is satisfied, inspect the VA zone at its designated location.",
-        "defect_when": "The front face is established and the designated VA zone is blank or shows no visible VA embossing.",
+        "check": "After the authoritative anatomy.face orientation rule establishes the front face, inspect the VA zone at its designated location.",
+        "defect_when": "Front is established by the shared anatomy.face rule and the designated VA zone is blank or shows no visible VA embossing.",
         "clear_when": "The back face is established and the VA zone is blank; or the front face is established and VA is visibly present.",
         "review_when": "The shared face orientation cannot be reliably established.",
         "ignore": [
