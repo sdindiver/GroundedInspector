@@ -45,8 +45,6 @@
         0,
         200
       ],
-      "scope": "part",
-      "reference_dir": "grounding/references/parts/bracket/defects/serration_missing",
       "decision": {
         "check": "Inspect the largest hole and determine whether its outer rim clearly has the required serrated/toothed pattern.",
         "defect_when": "The required serrated/toothed rim is not clearly visible on the largest hole.",
@@ -70,8 +68,6 @@
         90,
         0
       ],
-      "scope": "part",
-      "reference_dir": "grounding/references/parts/bracket/defects/incomplete_embossing",
       "decision": {
         "check": "After the front face is established, inspect the complete VA marking at its designated location.",
         "defect_when": "VA is present, but one or more required characters is visibly incomplete, partially formed, or clearly shallower/fainter than the other VA characters.",
@@ -94,8 +90,6 @@
         40,
         0
       ],
-      "scope": "part",
-      "reference_dir": "grounding/references/parts/bracket/defects/embossing_missing",
       "decision": {
         "check": "Establish front/back from the outer-edge profile before reading the VA zone.",
         "defect_when": "Front face is confirmed by a chamfered/rolled edge and countersunk plain holes, and the designated VA zone is blank.",
