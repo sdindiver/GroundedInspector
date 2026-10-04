@@ -57,3 +57,23 @@ Every defect uses the same decision shape:
 8. `NEEDS_REVIEW` is the explicit outcome when required evidence cannot distinguish the allowed states.
 
 Run `python -m tools.check_grounding` before committing grounding changes.
+
+
+## Inspection architecture
+
+For explicit-part inspection, runtime semantics are separated into:
+
+1. shared anatomy facts;
+2. independent defect decisions;
+3. deterministic verdict aggregation;
+4. deterministic rendering.
+
+A defect inspector receives only its own decision and its own visual exemplars. Do not
+move unrelated defect rules into a shared defect prompt merely to solve a local visual
+failure.
+
+Shared physical facts belong in part anatomy. Defect existence and localization belong
+in the owning defect decision. The renderer must not add semantic defect filters.
+
+If a rule is already explicit but remains visually unreliable, use the reference
+escalation process rather than indefinitely expanding global prompt prose.
