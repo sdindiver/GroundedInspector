@@ -40,7 +40,7 @@ def main():
         ids.add(name); check_defect(name,spec,"global")
     for part in C.list_parts():
         p=part.get("part","?")
-        defs=part.get("defects",part.get("part_defects",{})) or {}
+        defs=part.get("defects",{}) or {}
         local=set()
         for name,spec in defs.items():
             if name in local: fail(f"{p}: duplicate part defect {name}")
